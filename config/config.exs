@@ -8,7 +8,11 @@
 use Mix.Config
 
 config :git_notes,
-  ecto_repos: [GitNotes.Repo]
+  ecto_repos: [GitNotes.Repo],
+  client_id: System.get_env("GITHUB_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
+  webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
+  http_adapter: HTTPoison
 
 # Configures the endpoint
 config :git_notes, GitNotesWeb.Endpoint,
