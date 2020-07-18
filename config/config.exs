@@ -12,7 +12,17 @@ config :git_notes,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
-  http_adapter: HTTPoison
+  http_adapter: HTTPoison,
+  github_api_url: "https://api.github.com/app",
+  github_api_version: "application/vnd.github.v3+json",
+  github_app_id: "73363"
+
+
+config :joken,
+  default_signer: [
+    signer_alg: "RS256",
+    key_pem: System.get_env("PRIVATE_KEY")
+  ]
 
 # Configures the endpoint
 config :git_notes, GitNotesWeb.Endpoint,
@@ -29,6 +39,7 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

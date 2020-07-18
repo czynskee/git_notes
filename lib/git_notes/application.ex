@@ -14,9 +14,10 @@ defmodule GitNotes.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: GitNotes.PubSub},
       # Start the Endpoint (http/https)
-      GitNotesWeb.Endpoint
+      GitNotesWeb.Endpoint,
       # Start a worker by calling: GitNotes.Worker.start_link(arg)
       # {GitNotes.Worker, arg}
+      GitNotes.Token
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

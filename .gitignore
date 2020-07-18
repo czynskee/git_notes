@@ -35,3 +35,6 @@ npm-debug.log
 
 # this is to stop from exposing secrets in environment variables
 *.env
+
+# this is to keep the private key safe
+*.pem
