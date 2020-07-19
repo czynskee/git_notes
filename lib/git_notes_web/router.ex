@@ -34,9 +34,11 @@ defmodule GitNotesWeb.Router do
   if Mix.env() in [:dev, :test] do
     import Phoenix.LiveDashboard.Router
 
-    scope "/" do
+    scope "/", GitNotesWeb do
       pipe_through :browser
       live_dashboard "/dashboard", metrics: GitNotesWeb.Telemetry
+
+      get "/tests", TestController, :get
     end
   end
 end
