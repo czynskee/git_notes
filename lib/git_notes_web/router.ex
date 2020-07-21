@@ -37,7 +37,12 @@ defmodule GitNotesWeb.Router do
     scope "/", GitNotesWeb do
       pipe_through :browser
       live_dashboard "/dashboard", metrics: GitNotesWeb.Telemetry
+    end
+  end
 
+  if Mix.env() in [:dev, :test] do
+
+    scope "/", GitNotesWeb do
       get "/tests", TestController, :get
     end
   end

@@ -3,30 +3,8 @@ defmodule GitNotes.GithubTest do
   alias GitNotes.Github
   @http_adapter Application.fetch_env!(:git_notes, :http_adapter)
   @api_url Application.fetch_env!(:git_notes, :github_api_url)
-
-  test "add param adds param to url with correct format" do
-    url = Github.add_param(@api_url, "paramKey", "paramVal")
-
-    assert url == @api_url <> "&paramKey=paramVal"
-  end
-
-  test "add params adds multiple params to url with correct format" do
-    url = Github.add_params(@api_url, [{"key1", "val1"}, {"key2", "val2"}])
-
-    assert url == @api_url <> "?&key1=val1&key2=val2"
-  end
-
-  test "add params does nothing when there are no params passed" do
-    url = Github.add_params(@api_url, nil)
-
-    assert url == @api_url
-  end
-
-  test "add params works when just one param is passed" do
-    url = Github.add_params(@api_url, "key", "val")
-
-    assert url == @api_url <> "?&key=val"
-  end
+  @api_version Application.fetch_env!(:git_notes, :github_api_version)
+  @request_struct Module.concat(@http_adapter, Request)
 
   describe "tests around making requests" do
     setup do
@@ -46,10 +24,11 @@ defmodule GitNotes.GithubTest do
 
       base_url = "http://#{hostname}:#{port}"
 
-      request_struct = Module.concat(@http_adapter, Request) |> Kernel.struct(%{})
-
       %{
-        request: request_struct,
+        request: %@request_struct{
+          url: base_url <> "/tests",
+          method: :get
+        },
         url: base_url
       }
     end
@@ -72,18 +51,92 @@ defmodule GitNotes.GithubTest do
 
     Each request that fires should add its response to a response list which will be what is returned
     """
-    test "a single request hits the http_adapter and we get a success msg back", %{request: request, url: url} do
-      request_props = %{
-        url: "/tests",
-        method: :get
-        params: %{result: "success"}
-      }
-
-      request = Map.merge(request, request_props)
 
 
-      IO.inspect request
-      IO.inspect url
+    @doc """
+
+    Actually this can work differently. We can fire off async tasks as soon as we have them,
+    with functions that say what to do next. Before we respond to client we can await for all
+    of our responses in our mailbox.
+
+    We will have to know when we have gotten all of our responses and which ones we got so we should save
+    on the conn a map of all the things we're expecting back. Then when we've gotten all of those
+    out of the mailbox we can proceed
+    """
+    test "a single request hits the http_adapter and we get the appropriate msg back from our test controller", %{request: request, url: url} do
+      request = Map.put(request, :params, %{
+        result: "success"
+      })
+
+      { :ok, result } = Github.make_request(request)
+
+      assert result.status_code == 200
+
+      request = Map.put(request, :params, %{
+        result: "failure"
+      })
+
+      { :ok, result } = Github.make_request(request)
+
+      assert result.status_code == 400
+    end
+
+    test "requests include token", %{request: request} do
+      {:ok, token, _} = GitNotes.Token.get_token()
+
+      {:ok, response} = Github.make_request(request)
+
+      auth_header = get_header(response, :Authorization)
+
+      assert elem(auth_header, 1) == "Bearer #{token}"
+    end
+
+    test "requests include api version", %{request: request} do
+      {:ok, response} = Github.make_request(request)
+
+      accept_header = get_header(response, :Accept)
+
+      assert elem(accept_header, 1) == @api_version
+
+    end
+
+    test "makes post request to get access_token for installation" do
+        request = Github.get_access_token(123)
+
+        assert request.url == @api_url <> "/installations/123/access_tokens"
+        assert request.method == :post
+    end
+
+    test "addding request to queue will cause it to be made immediately and will return the response to senders mailbox", %{request: request} do
+      request = Map.put(request, :params, %{
+        sleep: 10000
+      })
+
+      Github.enqueue_request(self(), request)
+
+      response = assert_receive({_pid, HTTPoison.Request}, 1000)
+      # response = receive do
+      #   {_pid, response } -> response
+      # after
+      #   1000 -> assert true == false
+      # end
+
+      assert response.body == "success"
+
+    end
+
+    # test "one test for real", %{request: request} do
+    #    request = Map.put(request, :url, @api_url <> "/installations")
+
+    #    {:ok, response } = Github.make_request(request)
+
+    #    IO.inspect Jason.decode(response.body)
+    # end
+
+    defp get_header(response, header) do
+      request_headers = response.request.headers
+
+      Enum.find(request_headers, &(elem(&1, 0) == header))
     end
 
   end

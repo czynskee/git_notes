@@ -1,8 +1,5 @@
 defmodule HTTP.Adapter do
   @http_adapter Application.fetch_env!(:git_notes, :http_adapter)
-  @http_response_struct (Module.concat(@http_adapter, Request) |> Kernel.struct(%{}))
-
-  defstruct Map.keys(@http_response_struct)
 
   def get(url, headers \\ [], options \\ []) do
     url
@@ -20,5 +17,9 @@ defmodule HTTP.Adapter do
 
   defp get_url(url, headers, options) do
     @http_adapter.get url, headers, options
+  end
+
+  def request(request) do
+    @http_adapter.request(request)
   end
 end
