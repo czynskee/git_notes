@@ -1,0 +1,32 @@
+defmodule GitNotes.GithubAPI.HTTP do
+  @behaviour GitNotes.GithubAPI
+  @api_url Application.fetch_env!(:git_notes, :github_api_url)
+  @api_version Application.fetch_env!(:git_notes, :github_api_version)
+
+  @client_id Application.fetch_env!(:git_notes, :client_id)
+  @client_secret Application.fetch_env!(:git_notes, :client_secret)
+
+  alias GitNotes.Token
+  use HTTPoison.Base
+
+  def process_request_url(url) do
+    @api_url <> url
+  end
+
+  def process_request_headers(headers) do
+    headers
+      |> Keyword.put_new_lazy(:Authorization, fn ->
+        {:ok, token, _} = Token.get_jwt()
+        "Bearer #{token}"
+      end)
+      |> Keyword.put_new(:Accept, @api_version)
+  end
+
+  def post_code_for_user_token(code) do
+    post!(
+      "https://github.com/login/oauth/access_token?client_id=#{@client_id}&client_secret=#{@client_secret}&code=#{code}",
+      ""
+      )
+  end
+
+end

@@ -20,3 +20,5 @@ config :git_notes, GitNotesWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :git_notes, :github_api, GitNotes.GithubAPI.Mock

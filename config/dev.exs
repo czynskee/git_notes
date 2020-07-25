@@ -31,6 +31,7 @@ config :git_notes, GitNotesWeb.Endpoint,
     ]
   ]
 
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
@@ -75,3 +76,5 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :git_notes, :github_api, GitNotes.GithubAPI.HTTP

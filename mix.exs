@@ -47,7 +47,8 @@ defmodule GitNotes.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:httpoison, "~> 1.7"},
       {:earmark, "~> 1.4.9"},
-      {:joken, "~>2.2"}
+      {:joken, "~>2.2"},
+      {:mox, "~>0.5.2"}
     ]
   end
 

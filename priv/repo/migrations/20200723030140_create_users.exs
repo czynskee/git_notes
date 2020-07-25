@@ -3,8 +3,7 @@ defmodule GitNotes.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users) do
-      add :username, :string
-      add :notes_repo, :integer
+      add :login, :string
 
       timestamps()
     end

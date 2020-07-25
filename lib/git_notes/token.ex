@@ -2,6 +2,8 @@ defmodule GitNotes.Token do
   use Joken.Config
   use Agent
 
+  @github_api Application.fetch_env!(:git_notes, :github_api)
+
   def start(_opts \\ []) do
     start_link()
   end
@@ -28,10 +30,11 @@ defmodule GitNotes.Token do
     %{}
   end
 
-  def get_token(claims \\ %{}) do
-    iat = claims["iat"] || DateTime.now("Etc/UTC")
-    |> elem(1)
-    |> DateTime.to_unix()
+  def get_jwt(claims \\ %{}) do
+    iat = claims["iat"] || (
+      DateTime.now("Etc/UTC")
+      |> elem(1)
+      |> DateTime.to_unix())
 
     exp = claims["exp"] || iat + 600
 
@@ -46,8 +49,9 @@ defmodule GitNotes.Token do
     end
   end
 
-  def gen do
-    generate_and_sign()
+  def get_user_token() do
+
   end
+
 
 end

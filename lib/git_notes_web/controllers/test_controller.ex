@@ -2,6 +2,11 @@ defmodule GitNotesWeb.TestController do
   use GitNotesWeb, :controller
 
   def get(conn, params) do
+    # if JWT token is not present, set result to failure
+
+
+
+
     delay = params["sleep"]
 
     if delay do

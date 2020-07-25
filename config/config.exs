@@ -12,10 +12,11 @@ config :git_notes,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
-  http_adapter: HTTPoison,
   github_api_url: "https://api.github.com/app",
   github_api_version: "application/vnd.github.v3+json",
-  github_app_id: "73363"
+  github_app_id: "73363",
+  http_adapter: HTTPoison
+
 
 
 config :joken,
