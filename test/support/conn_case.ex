@@ -23,6 +23,7 @@ defmodule GitNotesWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import GitNotesWeb.ConnCase
+      import GitNotes.TestHelpers
 
       alias GitNotesWeb.Router.Helpers, as: Routes
 

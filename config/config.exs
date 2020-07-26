@@ -12,12 +12,12 @@ config :git_notes,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
-  github_api_url: "https://api.github.com/app",
+  github_api_url: "https://api.github.com",
   github_api_version: "application/vnd.github.v3+json",
   github_app_id: "73363",
-  http_adapter: HTTPoison
-
-
+  http_adapter: HTTPoison,
+  github_api: GitNotes.GithubAPI.HTTP,
+  public_app_name: "gitautonotes"
 
 config :joken,
   default_signer: [

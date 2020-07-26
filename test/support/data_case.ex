@@ -24,6 +24,7 @@ defmodule GitNotes.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import GitNotes.DataCase
+      import GitNotes.TestHelpers
     end
   end
 

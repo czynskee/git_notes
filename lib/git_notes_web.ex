@@ -48,6 +48,7 @@ defmodule GitNotesWeb do
 
       import Plug.Conn
       import Phoenix.Controller
+      import GitNotesWeb.WebhookController, only: [verify_signature: 2]
     end
   end
 

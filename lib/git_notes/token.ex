@@ -2,8 +2,6 @@ defmodule GitNotes.Token do
   use Joken.Config
   use Agent
 
-  @github_api Application.fetch_env!(:git_notes, :github_api)
-
   def start(_opts \\ []) do
     start_link()
   end
@@ -47,10 +45,6 @@ defmodule GitNotes.Token do
       set_key("jwt", token)
       token
     end
-  end
-
-  def get_user_token() do
-
   end
 
 

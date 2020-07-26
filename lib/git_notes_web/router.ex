@@ -17,8 +17,14 @@ defmodule GitNotesWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    resources "/users", UserController, only: [:new]
+    get "/users/install", UserController, :install
   end
 
+  scope "/webhooks", GitNotesWeb do
+    pipe_through [:api, :verify_signature]
+    post "/", WebhookController, :webhook
+  end
   # Other scopes may use custom stacks.
   # scope "/api", GitNotesWeb do
   #   pipe_through :api
@@ -40,10 +46,4 @@ defmodule GitNotesWeb.Router do
     end
   end
 
-  if Mix.env() in [:dev, :test] do
-
-    scope "/", GitNotesWeb do
-      get "/tests", TestController, :get
-    end
-  end
 end

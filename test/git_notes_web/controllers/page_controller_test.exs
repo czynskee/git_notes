@@ -1,5 +1,5 @@
 defmodule GitNotesWeb.PageControllerTest do
-  use GitNotesWeb.ConnCase
+  use GitNotesWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")

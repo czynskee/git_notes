@@ -28,4 +28,13 @@ defmodule GitNotes.GithubAPI.HTTPTest do
     assert Keyword.get_values(given_headers, :Accept) |> length == 1
   end
 
+  test "process response body handles errors" do
+    assert {:error, reason} = GithubAPI.HTTP.process_response_body("balblablbalba")
+  end
+
+  test "process response body handles valid json" do
+    assert {:ok, response} = GithubAPI.HTTP.process_response_body(~s({"age": 44, "name": "Steve Irwin"}))
+    assert response == %{"age" => 44, "name" => "Steve Irwin"}
+  end
+
 end
