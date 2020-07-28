@@ -41,11 +41,20 @@ defmodule GitNotes.GithubAPI.HTTP do
       end
   end
 
-  def get_username(token) do
+  def get_installation_access_token(installation_id) do
+    case get("/app/installations/#{installation_id}/access_tokens") do
+      {:error, _} -> :error
+      {:ok, response} -> response.body
+    end
+
+  end
+
+  def get_user(token) do
     case get("/user", [Authorization: "token #{token}"]) do
         {:error, _} -> :error
         {:ok, response} -> response.body
     end
   end
+
 
 end
