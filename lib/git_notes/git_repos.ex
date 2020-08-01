@@ -32,7 +32,7 @@ defmodule GitNotes.GitRepos do
     Repo.delete(repo)
   end
 
-  def update_repo(repo, attrs) do
+  def update_repo(%GitRepo{} = repo, attrs) do
     repo
     |> GitRepo.changeset(attrs)
     |> Repo.update()
@@ -40,8 +40,7 @@ defmodule GitNotes.GitRepos do
 
   def update_repo(%{"id" => id} = attrs) do
     get_repo(id)
-    |> GitRepo.changeset(attrs)
-    |> Repo.update()
+    update_repo(get_repo(id), attrs)
   end
 
 end

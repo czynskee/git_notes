@@ -5,6 +5,7 @@ defmodule GitNotesWeb.UserController do
     render(conn, "new.html")
   end
 
+
   # def install(conn, %{"code" => code, "installation_id" => installation_id, "setup_action" => "install"}) do
   #   case GitNotes.Github.get_access_token(code) do
   #     :error ->

@@ -1,6 +1,7 @@
 defmodule GitNotes.TestHelpers do
   alias GitNotes.Accounts
   alias GitNotes.GitRepos
+  alias GitNotes.Notes
 
   @app_id Application.fetch_env!(:git_notes, :github_app_id)
 
@@ -17,18 +18,33 @@ defmodule GitNotes.TestHelpers do
     |> elem(1)
   end
 
-  def repo_fixture(attrs \\ %{}) do
-    user = user_fixture()
+  def repo_fixture(attrs \\ %{}, opts \\ []) do
+    if is_nil(opts[:create_user]) or opts[:create_user] do
+      user_fixture()
+    end
 
     attrs
     |> Enum.into(%{
       "id" => 12345,
       "name" => "git_notes",
       "private" => true,
-      "user_id" => user.id
+      "user_id" => 123456
     })
     |> GitRepos.create_repo()
     |> elem(1)
+  end
+
+  def notes_repo_fixture(user, repo) do
+    Notes.create_notes_repo(%{
+      user_id: user.id, repo_id: repo.id
+    })
+    |> elem(1)
+  end
+
+  def fixtures() do
+    repo = repo_fixture()
+    user = Accounts.get_user(repo.user_id)
+    %{user: user, repo: repo}
   end
 
   def create_installation_payload() do

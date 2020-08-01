@@ -128,6 +128,10 @@ defmodule GitNotesWeb.WebhookControllerTest do
     assert Enum.find(commits, &(&1.message == "a third commit message"))
   end
 
+  test "new push that includes notes_repo updates files appropriately" do
+
+  end
+
 
 
 end

@@ -1,8 +1,9 @@
 defmodule GitNotes.GithubTest do
-  use ExUnit.Case, async: true
+  use GitNotes.DataCase, async: true
 
   alias GitNotes.GithubAPI.Mock
   alias GitNotes.Github
+  alias GitNotes.Notes
 
   import Mox
 
@@ -34,27 +35,46 @@ defmodule GitNotes.GithubTest do
     Github.get_installation_access_token(12345)
   end
 
-  # test "given an installation id registers a new user account" do
-  #   Mock
-  #     |> expect(:get_installation_access_token, fn(_installation_id) ->
-  #       {:ok, %{"token" => 12345}}
-  #     end)
+  test "populate notes" do
+    %{user: user, repo: repo} = fixtures()
 
-  #   assert {:ok, %User{} = user} = Github.new_installation(12345)
-  #   assert user == Accounts.get_user(user.id)
-  #   # check to make sure that they're correctly added to the database
-  #   # check to make sure their repos are correctly added to the database
-  # end
+    notes_repo = notes_repo_fixture(user, repo)
 
-  # test "given an installation id, we handle subsequent network errors gracefully" do
-  #   Mock
-  #     |>
+    Mock
+    |> expect(:get_repo_contents, fn(_token, _user, _repo) ->
+      [
+        %{
+          "name" => "2020-07-11.md"
+        },
+        %{
+          "name" => "2020-07-12.md"
+        }
+      ]
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-11.md") ->
+      %{
+        "name" => "2020-07-11.md",
+        "content" => "aGVsbG8="
+        }
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-12.md") ->
+      %{
+        "name" => "2020-07-12.md",
+        "content" => "Z29vZGJ5ZQ=="
+        }
+    end)
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      "token"
+    end)
 
-  #   assert {:error, reason} = Github.new_installation(12345)
-  #   # assert reason ==
+    Github.populate_notes(notes_repo)
 
-  #   # check to make sure they're not added to the database
-  #   # check to make sure their repos are not added to the database
-  # end
+    notes = Notes.list_files_for_user(user.id)
+
+    assert Enum.find(notes, &(&1.file_name == "2020-07-11.md"))
+    assert Enum.find(notes, &(&1.file_name == "2020-07-12.md"))
+
+  end
+
 
  end

@@ -10,6 +10,8 @@ defmodule GitNotes.Accounts.User do
     field :refresh_token, :string
     field :refresh_token_expiration, :utc_datetime
     has_many :repos, GitNotes.GitRepos.GitRepo
+    has_one :notes_repo, GitNotes.Notes.NotesRepo
+
 
     timestamps()
   end
@@ -17,8 +19,8 @@ defmodule GitNotes.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:refresh_token, :installation_id, :refresh_token_expiration])
-    |> validate_required([:installation_id])
+    |> cast(attrs, [:id, :refresh_token, :refresh_token_expiration])
+    |> validate_required([:id])
   end
 
   def registration_changeset(user, attrs) do

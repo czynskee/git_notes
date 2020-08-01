@@ -6,9 +6,8 @@ defmodule GitNotes.GitRepos.GitRepo do
 
   schema "repos" do
     field :name, :string
-    field :notes_repo, :boolean
     field :private, :boolean
-    belongs_to :user, GitNotes.Accounts.User
+    belongs_to :user, GitNotes.Accounts.User, foreign_key: :user_id
     has_many :commits, GitNotes.Commits.Commit
 
     timestamps()
@@ -16,7 +15,7 @@ defmodule GitNotes.GitRepos.GitRepo do
 
   def changeset(repo, attrs) do
     repo
-    |> cast(attrs, [:name, :id, :notes_repo, :private])
+    |> cast(attrs, [:name, :id, :private])
     |> unique_constraint(:id, name: :repos_pkey)
     |> validate_required([:id])
   end

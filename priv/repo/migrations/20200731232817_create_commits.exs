@@ -7,7 +7,7 @@ defmodule GitNotes.Repo.Migrations.CreateCommits do
     create table(:commits) do
       add :sha, :string, null: false
       add :ref, :string, null: false
-      add :message, :string, null: false
+      add :message, :text, null: false
       add :distinct, :boolean
       add :author, :string, null: false
       add :git_repo_id, references(:repos, on_delete: :delete_all)

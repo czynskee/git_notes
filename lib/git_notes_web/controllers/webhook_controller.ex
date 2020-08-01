@@ -25,7 +25,6 @@ defmodule GitNotesWeb.WebhookController do
 
   def webhook(conn, %{"action" => "created",
   "installation" => %{"id" => installation_id, "app_id" => @app_id}} = payload) do
-    IO.inspect "here"
     user =
     get_in(payload, ["installation", "account"])
     |> Map.put("installation_id", installation_id)

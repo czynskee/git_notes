@@ -87,4 +87,5 @@ defmodule GitNotes.GitReposTest do
     assert GitRepos.get_repo(repo.id).name == "newname"
   end
 
+
 end
