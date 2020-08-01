@@ -12,7 +12,8 @@ defmodule GitNotes.CommitsTest do
     "distinct" => true,
     "author" => "czynskee",
     "commit_date" => @commit_date,
-    "git_repo_id" => 12345
+    "git_repo_id" => 12345,
+    "ref" => "refs/head/master"
   }
 
   @invalid_attrs %{}
@@ -29,6 +30,8 @@ defmodule GitNotes.CommitsTest do
     assert commit.author == "czynskee"
     assert commit.commit_date == @commit_date
     assert commit.git_repo_id == repo.id
+    assert commit.ref == "refs/head/master"
+    assert commit.sha == "a654df65aer"
   end
 
   test "create commit with invalid attrs" do

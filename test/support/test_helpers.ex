@@ -98,27 +98,38 @@ defmodule GitNotes.TestHelpers do
     %{
       "commits" => [
         %{
-          "sha" => "a65d4f21df",
+          "id" => "a65d4f21df",
+          "timestamp" => "2020-07-31T20:08:05-07:00",
           "message" => "commit message",
-          "author" => "czynskee",
+          "author" => %{
+            "username" => "czynskee"
+          },
           "distinct" => true
         },
         %{
-          "sha" => "adfewrq510",
+          "id" => "dafdwerqa52",
+          "timestamp" => "2020-07-31T20:08:05-07:00",
           "message" => "a second commit message",
-          "author" => "czynskee",
+          "author" => %{
+            "username" => "czynskee"
+          },
           "distinct" => true
         },
         %{
-          "sha" => "adqer1asf",
+          "id" => "aer87qwe45234",
+          "timestamp" => "2020-07-31T20:08:05-07:00",
           "message" => "a third commit message",
-          "author" => "czynskee",
+          "author" => %{
+            "username" => "czynskee"
+          },
           "distinct" => true
         },
       ],
       "repository" => %{
         "id" => 12345
-      }
+      },
+      "ref" => "refs/head/master"
+
     }
   end
 

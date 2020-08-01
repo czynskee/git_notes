@@ -4,6 +4,7 @@ defmodule GitNotes.Commits.Commit do
 
   schema "commits" do
     field :sha, :string
+    field :ref, :string
     field :message, :string
     field :distinct, :boolean
     field :author, :string
@@ -15,9 +16,9 @@ defmodule GitNotes.Commits.Commit do
 
   def changeset(commit, attrs) do
     commit
-    |> cast(attrs, [:sha, :commit_date, :message, :sha, :distinct, :author, :git_repo_id])
+    |> cast(attrs, [:ref, :sha, :commit_date, :message, :sha, :distinct, :author, :git_repo_id])
     |> foreign_key_constraint(:git_repo_id)
-    |> validate_required([:sha, :commit_date, :message, :sha, :author, :git_repo_id])
+    |> validate_required([:ref, :sha, :commit_date, :message, :sha, :author, :git_repo_id])
   end
 
 end
