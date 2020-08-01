@@ -25,6 +25,7 @@ defmodule GitNotesWeb.WebhookController do
 
   def webhook(conn, %{"action" => "created",
   "installation" => %{"id" => installation_id, "app_id" => @app_id}} = payload) do
+    IO.inspect "here"
     user =
     get_in(payload, ["installation", "account"])
     |> Map.put("installation_id", installation_id)
@@ -41,7 +42,8 @@ defmodule GitNotesWeb.WebhookController do
     send_resp(conn, 200, "")
   end
 
-  def webhook(conn, %{"action" => "deleted", "installation" => %{"id" => installation_id, "app_id" => @app_id}}) do
+  def webhook(conn,
+    %{"action" => "deleted", "installation" => %{"id" => installation_id, "app_id" => @app_id}}) do
     Accounts.get_user_by([installation_id: installation_id])
     |> Accounts.delete_user()
 
@@ -80,7 +82,7 @@ defmodule GitNotesWeb.WebhookController do
   end
 
   def webhook(conn, _params) do
-    send_resp(conn, 200, "")
+    send_resp(conn, 404, "")
   end
 
 

@@ -14,7 +14,7 @@ config :git_notes,
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
   github_api_url: "https://api.github.com",
   github_api_version: "application/vnd.github.v3+json",
-  github_app_id: "73363",
+  github_app_id: 73363,
   http_adapter: HTTPoison,
   github_api: GitNotes.GithubAPI.HTTP,
   public_app_name: "gitautonotes"

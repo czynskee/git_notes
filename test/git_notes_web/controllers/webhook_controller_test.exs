@@ -35,7 +35,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
       conn = conn
       |> sign_request_and_post("/webhooks", %{"good_action" => "yay"})
 
-      assert response(conn, 200)
+      assert response(conn, 404)
   end
 
   test "deleted installation action removes user from database", %{conn: conn} do
