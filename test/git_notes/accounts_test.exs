@@ -7,7 +7,7 @@ defmodule GitNotes.AccountsTest do
   @valid_attrs %{
     installation_id: 123,
     id: 12345,
-    username: "czynskee"
+    login: "czynskee"
   }
 
   @invalid_attrs %{}
@@ -17,7 +17,7 @@ defmodule GitNotes.AccountsTest do
 
     assert user.installation_id == 123
     assert user.id == 12345
-    assert user.username == "czynskee"
+    assert user.login == "czynskee"
 
     assert [%User{id: ^id}] = Accounts.list_users()
   end

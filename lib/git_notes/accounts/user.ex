@@ -5,7 +5,7 @@ defmodule GitNotes.Accounts.User do
   @primary_key {:id, :integer, autogenerate: false}
 
   schema "users" do
-    field :username, :string
+    field :login, :string
     field :installation_id, :integer
     field :refresh_token, :string
     field :refresh_token_expiration, :utc_datetime
@@ -23,8 +23,8 @@ defmodule GitNotes.Accounts.User do
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :refresh_token, :installation_id, :refresh_token_expiration, :id])
-    |> validate_required([:installation_id, :username, :id])
-    |> unique_constraint([:installation_id, :username, :id])
+    |> cast(attrs, [:login, :refresh_token, :installation_id, :refresh_token_expiration, :id])
+    |> validate_required([:installation_id, :login, :id])
+    |> unique_constraint([:installation_id, :login, :id])
   end
 end

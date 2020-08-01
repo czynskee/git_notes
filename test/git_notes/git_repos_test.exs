@@ -54,5 +54,37 @@ defmodule GitNotes.GitReposTest do
     assert {:error, _reason} = GitRepos.create_repo(@valid_attrs)
   end
 
+  test "delete repo with repo struct" do
+    repo = repo_fixture()
+
+    assert {:ok, repo} = GitRepos.delete_repo(repo)
+
+    assert GitRepos.get_repo(repo.id) == nil
+
+  end
+
+  test "delete repo with repo id" do
+    repo = repo_fixture()
+
+    assert {:ok, repo} = GitRepos.delete_repo(repo.id)
+
+    assert GitRepos.get_repo(repo.id) == nil
+
+  end
+
+  test "update a repos name" do
+    repo = repo_fixture()
+    assert {:ok, repo} = GitRepos.update_repo(repo, %{name: "newname"})
+
+    assert GitRepos.get_repo(repo.id).name == "newname"
+  end
+
+  test "update a repos name without providing the repo" do
+    repo = repo_fixture()
+
+    assert {:ok, repo} = GitRepos.update_repo(%{"id" => repo.id, "name" => "newname"})
+
+    assert GitRepos.get_repo(repo.id).name == "newname"
+  end
 
 end

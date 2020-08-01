@@ -48,7 +48,7 @@ defmodule GitNotes.MixProject do
       {:httpoison, "~> 1.7"},
       {:earmark, "~> 1.4.9"},
       {:joken, "~>2.2"},
-      {:mox, "~>0.5.2"}
+      {:mox, "~>0.5.2"},
     ]
   end
 

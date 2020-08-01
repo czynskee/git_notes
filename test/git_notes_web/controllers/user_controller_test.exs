@@ -37,7 +37,7 @@ defmodule GitNotesWeb.UserControllerTest do
 
     assert user.id == 123456
     assert user.installation_id == 456
-    assert user.username == "czynskee"
+    assert user.login == "czynskee"
 
     # log user in and redirect to "/"
   end

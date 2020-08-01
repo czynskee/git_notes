@@ -42,7 +42,6 @@ defmodule GitNotesWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-
   # plug Plug.Parsers,
   #   body_reader: {Plugs.CacheBodyReader, :read_body, []},
   #   parsers: [:urlencoded, :multipart]

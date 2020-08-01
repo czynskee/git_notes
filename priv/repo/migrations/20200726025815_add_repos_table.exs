@@ -11,6 +11,6 @@ defmodule GitNotes.Repo.Migrations.AddReposTable do
       timestamps()
     end
 
-    create index(:repos, [:user_id])
+    create index(:repos, [:id])
   end
 end

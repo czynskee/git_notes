@@ -22,7 +22,7 @@ defmodule GitNotesWeb.UserController do
           response["refresh_token_expires_in"] |> Integer.parse() |> elem(0))
 
         case GitNotes.Accounts.register_user(%{
-          username: user["login"],
+          login: user["login"],
           id: user["id"],
           installation_id: installation_id,
           refresh_token: response["refresh_token"],
