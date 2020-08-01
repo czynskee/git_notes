@@ -2,6 +2,7 @@ defmodule GitNotesWeb.WebhookController do
   use GitNotesWeb, :controller
   alias GitNotes.Accounts
   alias GitNotes.GitRepos
+  alias GitNotes.Commits
 
   @webhook_secret Application.fetch_env!(:git_notes, :webhook_secret)
   @app_id Application.fetch_env!(:git_notes, :github_app_id)
@@ -63,6 +64,14 @@ defmodule GitNotesWeb.WebhookController do
   def webhook(conn, %{"action" => action, "repository" => repository})
   when action in ["renamed", "privatized", "publicized"] do
     GitRepos.update_repo(repository)
+    send_resp(conn, 200, "")
+  end
+
+  def webhook(conn, %{"commits" => commits, "repository" => %{"id" => repo_id}}) do
+    commits
+    |> Enum.map(&(Map.put(&1, "git_repo_id", repo_id)))
+    |> Enum.each(&(Commits.create_commit(&1)))
+
     send_resp(conn, 200, "")
   end
 

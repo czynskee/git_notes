@@ -3,6 +3,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
   alias GitNotes.Accounts.User
   alias GitNotes.GitRepos.GitRepo
+  alias GitNotes.Commits
 
   setup %{conn: conn} do
     conn = conn
@@ -116,7 +117,17 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
   test "new push adds commits to appropriate repo", %{conn: conn} do
     repo = repo_fixture()
+
+    sign_request_and_post(conn, "/webhooks", push_commits_payload())
+
+    commits = Commits.list_commits_by_repo(repo)
+
+    assert length(commits) === 3
+    assert Enum.find(commits, &(&1.message == "commit message"))
+    assert Enum.find(commits, &(&1.message == "a second commit message"))
+    assert Enum.find(commits, &(&1.message == "a third commit message"))
   end
+
 
 
 end

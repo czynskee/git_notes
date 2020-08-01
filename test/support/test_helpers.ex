@@ -96,7 +96,29 @@ defmodule GitNotes.TestHelpers do
 
   def push_commits_payload() do
     %{
-
+      "commits" => [
+        %{
+          "sha" => "a65d4f21df",
+          "message" => "commit message",
+          "author" => "czynskee",
+          "distinct" => true
+        },
+        %{
+          "sha" => "adfewrq510",
+          "message" => "a second commit message",
+          "author" => "czynskee",
+          "distinct" => true
+        },
+        %{
+          "sha" => "adqer1asf",
+          "message" => "a third commit message",
+          "author" => "czynskee",
+          "distinct" => true
+        },
+      ],
+      "repository" => %{
+        "id" => 12345
+      }
     }
   end
 
