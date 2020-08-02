@@ -42,7 +42,7 @@ defmodule GitNotes.GithubTest do
 
     Mock
     |> expect(:get_repo_contents, fn(_token, _user, _repo) ->
-      [
+      {:ok, [
         %{
           "name" => "2020-07-11.md"
         },
@@ -50,21 +50,26 @@ defmodule GitNotes.GithubTest do
           "name" => "2020-07-12.md"
         }
       ]
+    }
     end)
     |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-11.md") ->
-      %{
+      {:ok, %{
         "name" => "2020-07-11.md",
         "content" => "aGVsbG8="
         }
+      }
     end)
     |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-12.md") ->
-      %{
+      {:ok, %{
         "name" => "2020-07-12.md",
         "content" => "Z29vZGJ5ZQ=="
         }
+      }
     end)
     |> expect(:get_installation_access_token, fn(_installation_id) ->
-      "token"
+      {:ok, %{
+        "token" => "heresatoken"
+      }}
     end)
 
     Github.populate_notes(notes_repo)

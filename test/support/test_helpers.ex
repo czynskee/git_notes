@@ -68,7 +68,6 @@ defmodule GitNotes.TestHelpers do
           "id" => 678910,
           "name" => "cool-repo",
           "private" => false
-
         }
         ]
       }
@@ -144,9 +143,50 @@ defmodule GitNotes.TestHelpers do
       "repository" => %{
         "id" => 12345
       },
+      "head_commit" => %{
+        "added" => [],
+        "modified" => [],
+        "removed" => []
+      },
       "ref" => "refs/head/master"
-
     }
+  end
+
+  def notes_commit_payload(opts) do
+    map = %{
+      "added" => [],
+      "removed" => [],
+      "modified" => []
+    }
+
+    map =
+    if :added in opts do
+      Map.put(map, "added", [
+        "2020-08-01.md",
+        "2020-07-31.md"
+      ])
+      else map
+    end
+
+    map =
+    if :removed in opts do
+      Map.put(map, "removed", [
+        "2020-08-01.md",
+        "2020-07-31.md"
+      ])
+      else map
+    end
+
+    map =
+    if :modified in opts do
+      Map.put(map, "modified", [
+        "2020-08-01.md",
+        "2020-07-31.md"
+      ])
+      else map
+    end
+
+    Map.put(push_commits_payload(), "head_commit", map)
   end
 
 end

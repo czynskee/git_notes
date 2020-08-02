@@ -1,9 +1,16 @@
 defmodule GitNotesWeb.WebhookControllerTest do
   use GitNotesWeb.ConnCase, async: true
 
+  alias GitNotes.GithubAPI.Mock
   alias GitNotes.Accounts.User
   alias GitNotes.GitRepos.GitRepo
   alias GitNotes.Commits
+  alias GitNotes.Notes
+  alias GitNotes.Notes.File
+
+  import Mox
+
+  setup :verify_on_exit!
 
   setup %{conn: conn} do
     conn = conn
@@ -128,10 +135,76 @@ defmodule GitNotesWeb.WebhookControllerTest do
     assert Enum.find(commits, &(&1.message == "a third commit message"))
   end
 
-  test "new push that includes notes_repo updates files appropriately" do
+  test "new push that includes notes_repo updates files appropriately", %{conn: conn} do
+    %{repo: repo, user: user} = fixtures()
+
+    notes_repo_fixture(user, repo)
+
+    Mock
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      {:ok, %{
+        "token" => "heresatoken"
+      }}
+    end)
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      {:ok, %{
+        "token" => "heresatoken"
+      }}
+    end)
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      {:ok, %{
+        "token" => "heresatoken"
+      }}
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-08-01.md") ->
+      {:ok, %{
+        "name" => "2020-08-01.md",
+        "content" => "hello"
+        }}
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-31.md") ->
+      {:ok, %{
+        "name" => "2020-07-31.md",
+        "content" => "there"
+        }}
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-08-01.md") ->
+      {:ok, %{
+        "name" => "2020-08-01.md",
+        "content" => "different"
+        }}
+    end)
+    |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-07-31.md") ->
+      {:ok, %{
+        "name" => "2020-07-31.md",
+        "content" => "now"
+        }}
+    end)
+
+
+    sign_request_and_post(conn, "/webhooks", notes_commit_payload([:added]))
+
+    files = Notes.list_files_for_user(user)
+
+    assert length(files) == 2
+
+    assert %File{} = file1 = Enum.find(files, &(&1.file_name == "2020-08-01.md"))
+    assert %File{} = file2 = Enum.find(files, &(&1.file_name == "2020-07-31.md"))
+
+    assert file1.content == "hello"
+    assert file2.content == "there"
+
+    sign_request_and_post(conn, "/webhooks", notes_commit_payload([:modified]))
+
+    assert Notes.get_file(file1).content == "different"
+    assert Notes.get_file(file2).content == "now"
+
+    sign_request_and_post(conn, "/webhooks", notes_commit_payload([:removed]))
+
+    files = Notes.list_files_for_user(user)
+
+    assert length(files) == 0
 
   end
-
-
 
 end

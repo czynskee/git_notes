@@ -3,6 +3,8 @@ defmodule GitNotesWeb.WebhookController do
   alias GitNotes.Accounts
   alias GitNotes.GitRepos
   alias GitNotes.Commits
+  alias GitNotes.Notes
+  alias GitNotes.Github
 
   @webhook_secret Application.fetch_env!(:git_notes, :webhook_secret)
   @app_id Application.fetch_env!(:git_notes, :github_app_id)
@@ -68,7 +70,7 @@ defmodule GitNotesWeb.WebhookController do
     send_resp(conn, 200, "")
   end
 
-  def webhook(conn, %{"commits" => commits, "ref" => ref, "repository" => %{"id" => repo_id}}) do
+  def webhook(conn, %{"commits" => commits, "ref" => ref, "repository" => %{"id" => repo_id}} = payload) do
     commits
     |> Enum.map(&(Map.put(&1, "git_repo_id", repo_id)))
     |> Enum.map(&(Map.put(&1, "author", get_in(&1, ["author", "username"]))))
@@ -77,12 +79,17 @@ defmodule GitNotesWeb.WebhookController do
     |> Enum.map(&(Map.put(&1, "ref", ref)))
     |> Enum.each(&(Commits.create_commit(&1)))
 
+    notes_repo = Notes.get_notes_repo_for_gitrepo(repo_id)
+
+    if notes_repo do
+      Github.update_notes_files(notes_repo, payload["head_commit"])
+    end
+
     send_resp(conn, 200, "")
   end
 
   def webhook(conn, _params) do
     send_resp(conn, 404, "")
   end
-
 
 end
