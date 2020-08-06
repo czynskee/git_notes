@@ -21,7 +21,9 @@ defmodule GitNotesWeb.WebhookController do
   end
 
   def sign(raw_body) do
-    :crypto.hmac(:sha, @webhook_secret, raw_body) |> Base.encode16 |> String.downcase()
+    :crypto.hmac(:sha, @webhook_secret, raw_body)
+    |> Base.encode16
+    |> String.downcase()
   end
 
   def webhook(conn, %{"action" => "created",
