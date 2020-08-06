@@ -3,6 +3,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
   alias GitNotes.GithubAPI.Mock
   alias GitNotes.Accounts.User
+  alias GitNotes.Accounts
   alias GitNotes.GitRepos.GitRepo
   alias GitNotes.Commits
   alias GitNotes.Notes
@@ -87,7 +88,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   end
 
   test "deleted repo action deletes repo from database under correct user", %{conn: conn} do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
     assert %GitRepo{} = GitNotes.GitRepos.get_repo(repo.id)
 
@@ -97,7 +98,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   end
 
   test "renamed repo action renames repo", %{conn: conn} do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
     sign_request_and_post(conn, "/webhooks", rename_repo_payload())
 
@@ -105,6 +106,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   end
 
   test "privatized action privatizes repo", %{conn: conn} do
+    user_fixture()
     repo = repo_fixture(%{"private" => false})
     assert repo.private == false
 
@@ -114,7 +116,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   end
 
   test "publicize action publicizes repo", %{conn: conn} do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
     assert repo.private == true
 
     sign_request_and_post(conn, "/webhooks", publicize_repo_payload())
@@ -123,7 +125,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   end
 
   test "new push adds commits to appropriate repo", %{conn: conn} do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
     sign_request_and_post(conn, "/webhooks", push_commits_payload())
 
@@ -138,7 +140,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
   test "new push that includes notes_repo updates files appropriately", %{conn: conn} do
     %{repo: repo, user: user} = fixtures()
 
-    notes_repo_fixture(user, repo)
+    Accounts.update_user(user, %{"notes_repo_id" => repo.id})
 
     Mock
     |> expect(:get_installation_access_token, fn(_installation_id) ->
@@ -184,12 +186,12 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
     sign_request_and_post(conn, "/webhooks", notes_commit_payload([:added]))
 
-    files = Notes.list_files_for_user(user)
+    files = Notes.list_user_files(user)
 
     assert length(files) == 2
 
-    assert %File{} = file1 = Enum.find(files, &(&1.file_name == "2020-08-01.md"))
-    assert %File{} = file2 = Enum.find(files, &(&1.file_name == "2020-07-31.md"))
+    assert %File{} = file1 = Enum.find(files, &(&1.name == "2020-08-01.md"))
+    assert %File{} = file2 = Enum.find(files, &(&1.name == "2020-07-31.md"))
 
     assert file1.content == "hello"
     assert file2.content == "there"
@@ -201,7 +203,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
     sign_request_and_post(conn, "/webhooks", notes_commit_payload([:removed]))
 
-    files = Notes.list_files_for_user(user)
+    files = Notes.list_user_files(user)
 
     assert length(files) == 0
 

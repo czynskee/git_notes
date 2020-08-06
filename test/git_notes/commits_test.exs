@@ -19,9 +19,9 @@ defmodule GitNotes.CommitsTest do
   @invalid_attrs %{}
 
   test "create commit with valid attrs" do
-    repo = repo_fixture()
+    %{repo: repo, user: _user} = fixtures()
 
-    assert {:ok, commit} = Commits.create_commit(@valid_attrs)
+    commit = Commits.create_commit(@valid_attrs)
 
     assert commit = Repo.get(Commit, commit.id)
 
@@ -35,20 +35,18 @@ defmodule GitNotes.CommitsTest do
   end
 
   test "create commit with invalid attrs" do
-    assert {:error, _reason} = Commits.create_commit(@invalid_attrs)
+    assert catch_error Commits.create_commit(@invalid_attrs)
   end
 
   test "list all commits by repo and by user" do
-    repo = repo_fixture()
+    %{repo: repo, user: user} = fixtures()
 
-    {:ok, commit1} = Commits.create_commit(@valid_attrs)
-    {:ok, commit2} = Commits.create_commit(%{@valid_attrs | "sha" => "a65sd74r8we", "message" => "different message"})
+    commit1 = Commits.create_commit(@valid_attrs)
+    commit2 = Commits.create_commit(%{@valid_attrs | "sha" => "a65sd74r8we", "message" => "different message"})
 
     commits = Commits.list_commits_by_repo(repo)
     assert commit1 in commits
     assert commit2 in commits
-
-    user = GitNotes.Accounts.get_user(repo.user_id)
 
     user_commits = Commits.list_commits_by_user(user)
 
@@ -56,7 +54,4 @@ defmodule GitNotes.CommitsTest do
     assert commit2 in user_commits
   end
 
-  test "list all commits by user" do
-
-  end
 end

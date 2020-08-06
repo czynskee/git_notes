@@ -15,7 +15,7 @@ defmodule GitNotes.GitReposTest do
   test "create repo with valid attrs" do
     user = user_fixture()
 
-    assert {:ok, %GitRepo{} = repo} = GitRepos.create_repo(@valid_attrs)
+    assert %GitRepo{} = repo = GitRepos.create_repo(@valid_attrs)
 
     assert repo.name == "cool-repo"
     assert repo.id == @valid_attrs.id
@@ -29,15 +29,15 @@ defmodule GitNotes.GitReposTest do
   end
 
   test "create repo with invalid attrs" do
-    assert {:error, _reason} = GitRepos.create_repo(@invalid_attrs)
+    assert catch_error GitRepos.create_repo(@invalid_attrs)
   end
 
   test "list user repos" do
     user = user_fixture()
 
-    {:ok, repo1} = GitRepos.create_repo(@valid_attrs)
-    {:ok, repo2} = GitRepos.create_repo(%{@valid_attrs | name: "different-repo", id: 1234564687})
-    {:ok, repo3} = GitRepos.create_repo(%{@valid_attrs | name: "different-repo-2", id: 496871})
+    repo1 = GitRepos.create_repo(@valid_attrs)
+    repo2 = GitRepos.create_repo(%{@valid_attrs | name: "different-repo", id: 1234564687})
+    repo3 = GitRepos.create_repo(%{@valid_attrs | name: "different-repo-2", id: 496871})
 
     all_repos = GitRepos.list_user_repos(user)
 
@@ -51,38 +51,38 @@ defmodule GitNotes.GitReposTest do
     user_fixture()
 
     GitRepos.create_repo(@valid_attrs)
-    assert {:error, _reason} = GitRepos.create_repo(@valid_attrs)
+    assert catch_error GitRepos.create_repo(@valid_attrs)
   end
 
   test "delete repo with repo struct" do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
-    assert {:ok, repo} = GitRepos.delete_repo(repo)
+    repo = GitRepos.delete_repo(repo)
 
     assert GitRepos.get_repo(repo.id) == nil
 
   end
 
   test "delete repo with repo id" do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
-    assert {:ok, repo} = GitRepos.delete_repo(repo.id)
+    repo = GitRepos.delete_repo(repo.id)
 
     assert GitRepos.get_repo(repo.id) == nil
 
   end
 
   test "update a repos name" do
-    repo = repo_fixture()
-    assert {:ok, repo} = GitRepos.update_repo(repo, %{name: "newname"})
+    %{repo: repo} = fixtures()
+    repo = GitRepos.update_repo(repo, %{name: "newname"})
 
     assert GitRepos.get_repo(repo.id).name == "newname"
   end
 
   test "update a repos name without providing the repo" do
-    repo = repo_fixture()
+    %{repo: repo} = fixtures()
 
-    assert {:ok, repo} = GitRepos.update_repo(%{"id" => repo.id, "name" => "newname"})
+    repo = GitRepos.update_repo(%{"id" => repo.id, "name" => "newname"})
 
     assert GitRepos.get_repo(repo.id).name == "newname"
   end

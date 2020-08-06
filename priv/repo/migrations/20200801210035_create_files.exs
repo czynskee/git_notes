@@ -3,13 +3,15 @@ defmodule GitNotes.Repo.Migrations.CreateFiles do
 
   def change do
     create table(:files) do
-      add :file_name, :string
+      add :name, :string
       add :content, :text
-      add :notes_repo_id, references(:notes_repos, on_delete: :delete_all)
+      add :file_name_date, :date
+      add :git_repo_id, references(:repos, on_delete: :delete_all)
 
       timestamps()
     end
 
-    create index(:files, [:notes_repo_id])
+    create index(:files, [:git_repo_id])
+    create unique_index(:files, [:git_repo_id, :name])
   end
 end

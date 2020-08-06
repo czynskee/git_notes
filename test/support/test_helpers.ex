@@ -1,28 +1,22 @@
 defmodule GitNotes.TestHelpers do
   alias GitNotes.Accounts
   alias GitNotes.GitRepos
-  alias GitNotes.Notes
 
   @app_id Application.fetch_env!(:git_notes, :github_app_id)
 
   def user_fixture(attrs \\ %{}) do
     attrs
     |> Enum.into(%{
-      installation_id: 123,
-      id: 123456,
-      refresh_token: "456",
-      login: "czynskee",
-      refresh_token_expiration: DateTime.now("Etc/UTC") |> elem(1) |> DateTime.add(60 * 60 * 24 * 30 * 3, :second)
+      "installation_id" => 123,
+      "id" => 123456,
+      "refresh_token" => "456",
+      "login" => "czynskee",
+      "refresh_token_expiration" => DateTime.now("Etc/UTC") |> elem(1) |> DateTime.add(60 * 60 * 24 * 30 * 3, :second)
     })
     |> Accounts.register_user()
-    |> elem(1)
   end
 
-  def repo_fixture(attrs \\ %{}, opts \\ []) do
-    if is_nil(opts[:create_user]) or opts[:create_user] do
-      user_fixture()
-    end
-
+  def repo_fixture(attrs \\ %{}) do
     attrs
     |> Enum.into(%{
       "id" => 12345,
@@ -31,19 +25,13 @@ defmodule GitNotes.TestHelpers do
       "user_id" => 123456
     })
     |> GitRepos.create_repo()
-    |> elem(1)
   end
 
-  def notes_repo_fixture(user, repo) do
-    Notes.create_notes_repo(%{
-      user_id: user.id, repo_id: repo.id
-    })
-    |> elem(1)
-  end
 
   def fixtures() do
-    repo = repo_fixture()
-    user = Accounts.get_user(repo.user_id)
+    user = user_fixture()
+    repo = repo_fixture(%{"user_id" => user.id})
+
     %{user: user, repo: repo}
   end
 

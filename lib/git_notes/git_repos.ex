@@ -20,22 +20,22 @@ defmodule GitNotes.GitRepos do
   def create_repo(attrs) do
     %GitRepo{}
     |> GitRepo.new_repo_changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert!()
   end
 
   def delete_repo(repo_id) when is_integer(repo_id) do
     get_repo(repo_id)
-    |> Repo.delete()
+    |> delete_repo()
   end
 
   def delete_repo(%GitRepo{} = repo) do
-    Repo.delete(repo)
+    Repo.delete!(repo)
   end
 
   def update_repo(%GitRepo{} = repo, attrs) do
     repo
     |> GitRepo.changeset(attrs)
-    |> Repo.update()
+    |> Repo.update!()
   end
 
   def update_repo(%{"id" => id} = attrs) do

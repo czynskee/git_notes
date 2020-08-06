@@ -11,6 +11,10 @@ defmodule GitNotes.Repo.Migrations.AddReposTable do
       timestamps()
     end
 
+    alter table(:users) do
+      add :notes_repo_id, references(:repos, on_delete: :nilify_all)
+    end
+
     create index(:repos, [:id])
   end
 end

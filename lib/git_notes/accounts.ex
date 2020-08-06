@@ -9,15 +9,25 @@ defmodule GitNotes.Accounts do
   def register_user(attrs \\ %{}) do
     %User{}
     |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert!()
   end
 
   def get_user_by(params) do
     Repo.get_by(User, params)
   end
 
-  def get_user(id) do
+  def get_user(id) when is_integer(id) do
     Repo.get(User, id)
+  end
+
+  def get_user(%User{} = user) do
+    get_user(user.id)
+  end
+
+
+  def get_user_and_notes_repo(repo_id) do
+    Repo.get_by(User, [notes_repo_id: repo_id])
+    |> Repo.preload(:notes_repo)
   end
 
   def list_users() do
@@ -25,12 +35,12 @@ defmodule GitNotes.Accounts do
   end
 
   def delete_user(%User{} = user) do
-    Repo.delete(user)
+    Repo.delete!(user)
   end
 
   def update_user(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)
-    |> Repo.update()
+    |> Repo.update!()
   end
 end

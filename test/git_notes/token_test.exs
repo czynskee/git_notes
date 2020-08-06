@@ -55,12 +55,4 @@ defmodule GitNotes.TokenTest do
     end
 
   end
-
-  describe "testing user tokens" do
-
-    # test "we make a post request for an access token" do
-    #   Token.get_access_token(code)
-    # end
-  end
-
 end

@@ -8,7 +8,10 @@ defmodule GitNotes.GitRepos.GitRepo do
     field :name, :string
     field :private, :boolean
     belongs_to :user, GitNotes.Accounts.User, foreign_key: :user_id
+    has_one :notes_user, GitNotes.Accounts.User
     has_many :commits, GitNotes.Commits.Commit
+    has_many :files, GitNotes.Notes.File
+
 
     timestamps()
   end

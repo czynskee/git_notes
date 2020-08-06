@@ -38,7 +38,7 @@ defmodule GitNotes.GithubTest do
   test "populate notes" do
     %{user: user, repo: repo} = fixtures()
 
-    notes_repo = notes_repo_fixture(user, repo)
+    GitNotes.Accounts.update_user(user, %{"notes_repo_id" => repo.id})
 
     Mock
     |> expect(:get_repo_contents, fn(_token, _user, _repo) ->
@@ -72,12 +72,12 @@ defmodule GitNotes.GithubTest do
       }}
     end)
 
-    Github.populate_notes(notes_repo)
+    Github.populate_notes(repo.id)
+    notes = Notes.list_user_files(user.id)
 
-    notes = Notes.list_files_for_user(user.id)
 
-    assert Enum.find(notes, &(&1.file_name == "2020-07-11.md"))
-    assert Enum.find(notes, &(&1.file_name == "2020-07-12.md"))
+    assert Enum.find(notes, &(&1.name == "2020-07-11.md"))
+    assert Enum.find(notes, &(&1.name == "2020-07-12.md"))
 
   end
 
