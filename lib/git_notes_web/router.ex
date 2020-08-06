@@ -19,6 +19,7 @@ defmodule GitNotesWeb.Router do
     get "/", PageController, :index
     resources "/users", UserController, only: [:new]
     get "/users/install", UserController, :install
+    resources "/sessions", SessionController, only: [:new]
   end
 
   scope "/webhooks", GitNotesWeb do

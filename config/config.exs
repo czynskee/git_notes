@@ -9,6 +9,7 @@ use Mix.Config
 
 config :git_notes,
   ecto_repos: [GitNotes.Repo],
+  oauth_url: "https://github.com/login/oauth/authorize",
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
