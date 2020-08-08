@@ -9,9 +9,7 @@ defmodule GitNotes.TestHelpers do
     |> Enum.into(%{
       "installation_id" => 123,
       "id" => 123456,
-      "refresh_token" => "456",
-      "login" => "czynskee",
-      "refresh_token_expiration" => DateTime.now("Etc/UTC") |> elem(1) |> DateTime.add(60 * 60 * 24 * 30 * 3, :second)
+      "login" => "czynskee"
     })
     |> Accounts.register_user()
   end
@@ -175,6 +173,26 @@ defmodule GitNotes.TestHelpers do
     end
 
     Map.put(push_commits_payload(), "head_commit", map)
+  end
+
+  def github_oauth_credentials() do
+    %{
+      "access_token" => "abc123",
+      "expires_in" => "28800",
+      "refresh_token" => "r1.zxy987",
+      "refresh_token_expires_in" => "15811200",
+      "scope" => "",
+      "token_type" => "bearer"
+    }
+  end
+
+  def now_plus_seconds(seconds) do
+    DateTime.now("Etc/UTC")
+    |> elem(1)
+    |> DateTime.add(seconds
+      |> Integer.parse()
+      |> elem(0))
+    |> DateTime.to_unix()
   end
 
 end

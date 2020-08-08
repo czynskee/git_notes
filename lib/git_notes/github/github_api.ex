@@ -10,4 +10,7 @@ defmodule GitNotes.GithubAPI do
 
   @callback get_file_contents(token :: String.t(), user_id :: Integer.t(), repo_id :: Integer.t(), name :: String.t()) :: :error | %{String.t() => String.t()}
 
+  @callback get_installations(token :: String.t()) :: :error | %{String.t() => String.t()}
+
+  @callback get_installation_repos(token :: String.t()) :: :error | %{String.t() => String.t()}
 end

@@ -51,6 +51,16 @@ defmodule GitNotes.GithubAPI.HTTP do
     |> get_response()
   end
 
+  def get_installation_repos(token) do
+    get("/installation/repositories", user_token(token))
+    |> get_response()
+  end
+
+  def get_installations(token) do
+    get("/user/installations", user_token(token))
+    |> get_response()
+  end
+
   def get_repo_contents(token, user, repo) do
     get("/repos/#{user.login}/#{repo.name}/contents/", user_token(token))
     |> get_response()
@@ -62,11 +72,14 @@ defmodule GitNotes.GithubAPI.HTTP do
   end
 
   defp get_response({:error, _reason}), do: :error
+  defp get_response({:ok, %{body: %{"message" => "Bad credentials"}}}), do: :error
   defp get_response({:ok, response}), do: response.body
 
   defp user_token(token) do
     [Authorization: "token #{token}"]
   end
+
+
 
 
 end

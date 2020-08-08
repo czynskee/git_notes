@@ -43,4 +43,10 @@ defmodule GitNotes.Accounts do
     |> User.changeset(attrs)
     |> Repo.update!()
   end
+
+  def update_github_credentials(%User{} = user, credentials) do
+    user
+    |> User.github_credentials_changeset(credentials)
+    |> Repo.update!()
+  end
 end

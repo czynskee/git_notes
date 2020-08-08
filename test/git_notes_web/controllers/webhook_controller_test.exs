@@ -60,6 +60,18 @@ defmodule GitNotesWeb.WebhookControllerTest do
     assert response(conn, 200)
   end
 
+  test "deleted installation action does nothing if the user is not in the database", %{conn: conn} do
+    assert GitNotes.Accounts.get_user_by([installation_id: 123]) == nil
+
+    params = delete_installation_payload()
+
+    conn = conn
+    |> sign_request_and_post("/webhooks", params)
+
+    assert GitNotes.Accounts.get_user_by([installation_id: 123]) == nil
+    assert response(conn, 200)
+  end
+
   test "created installation action adds user and repos to database", %{conn: conn} do
     params = create_installation_payload()
 

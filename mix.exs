@@ -49,6 +49,7 @@ defmodule GitNotes.MixProject do
       {:earmark, "~> 1.4.9"},
       {:joken, "~>2.2"},
       {:mox, "~>0.5.2"},
+      {:phoenix_live_view, "~> 0.14.4"}
     ]
   end
 

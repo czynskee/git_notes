@@ -1,6 +1,8 @@
 defmodule GitNotes.GitRepos do
   alias GitNotes.GitRepos.GitRepo
   alias GitNotes.Repo
+  alias GitNotes.Accounts.User
+
   import Ecto.Query
 
   def list_user_repos(%GitNotes.Accounts.User{id: user_id}) do
@@ -21,6 +23,15 @@ defmodule GitNotes.GitRepos do
     %GitRepo{}
     |> GitRepo.new_repo_changeset(attrs)
     |> Repo.insert!()
+  end
+
+  def create_repos_for_user(%User{} = user, repo_payload) do
+    get_in(repo_payload, ["repositories"])
+    |> Enum.each(fn repo ->
+      repo
+      |> Map.put("user_id", user.id)
+      |> create_repo()
+    end)
   end
 
   def delete_repo(repo_id) when is_integer(repo_id) do

@@ -22,7 +22,15 @@ defmodule GitNotes.Github do
 
   def get_user(token) do
     @github_api.get_user(token)
-    |> elem(1)
+  end
+
+  def get_installations(token) do
+    @github_api.get_installations(token)
+  end
+
+  def get_installation_repos(installation_id) do
+    retrieve_install_token(installation_id)
+    |> @github_api.get_installation_repos()
   end
 
   def populate_notes(%GitNotes.GitRepos.GitRepo{} = git_repo) do

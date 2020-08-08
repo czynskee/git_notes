@@ -7,6 +7,8 @@ defmodule GitNotes.Repo.Migrations.CreateUsersTable do
       add :login, :string, null: false
       add :refresh_token, :string
       add :refresh_token_expiration, :utc_datetime
+      add :access_token, :string
+      add :access_token_expiration, :utc_datetime
       timestamps()
     end
 

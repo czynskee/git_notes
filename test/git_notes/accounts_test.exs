@@ -48,6 +48,24 @@ defmodule GitNotes.AccountsTest do
     assert catch_error Accounts.update_user(user, %{"notes_repo_id" => repo.id})
   end
 
+  test "update user github credentials" do
+    user = user_fixture()
+    creds = github_oauth_credentials()
+    Accounts.update_github_credentials(user, creds)
+
+    user = Accounts.get_user(user.id)
+
+    assert user.refresh_token == creds["refresh_token"]
+    assert user.access_token == creds["access_token"]
+    assert_in_delta user.refresh_token_expiration |> DateTime.to_unix(),
+      now_plus_seconds(creds["refresh_token_expires_in"]), 5
+
+    assert_in_delta user.access_token_expiration |> DateTime.to_unix(),
+      now_plus_seconds(creds["expires_in"]), 5
+
+
+    end
+
   describe "ensuring database integrity on subsequent user registrations" do
 
     setup do

@@ -11,7 +11,7 @@ defmodule GitNotes.GithubTest do
 
   test "get access token posts to github API" do
     expect(Mock, :get_access_token, fn _code ->
-      {:ok, %{"access_code" => "123"}}
+      {:ok, %{"access_token" => "123"}}
     end)
 
     Github.get_access_token("123")
@@ -22,7 +22,7 @@ defmodule GitNotes.GithubTest do
       {:ok, %{"login" => "czynskee", "id" => 123456}}
     end)
 
-    assert Github.get_user("123") == %{"login" => "czynskee", "id" => 123456}
+    assert Github.get_user("123") == {:ok, %{"login" => "czynskee", "id" => 123456}}
 
   end
 

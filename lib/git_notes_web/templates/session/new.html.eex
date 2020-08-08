@@ -1,1 +1,2 @@
-<a href=@oauth_url>
+<%= link "Login", to: @conn.assigns.oauth_url %>
+

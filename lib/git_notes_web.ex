@@ -23,6 +23,8 @@ defmodule GitNotesWeb do
 
       import Plug.Conn
       import GitNotesWeb.Gettext
+      import Phoenix.LiveView.Controller
+
       alias GitNotesWeb.Router.Helpers, as: Routes
     end
   end
@@ -42,13 +44,32 @@ defmodule GitNotesWeb do
     end
   end
 
+  def live_view do
+    quote do
+      use Phoenix.LiveView, layout: {GitNotesWeb.LayoutView, "live.html"}
+
+      unquote(view_helpers())
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(view_helpers())
+    end
+  end
+
   def router do
     quote do
       use Phoenix.Router
 
       import Plug.Conn
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
       import GitNotesWeb.WebhookController, only: [verify_signature: 2]
+      import GitNotesWeb.Auth, only: [authenticate: 2]
+
     end
   end
 
@@ -65,6 +86,7 @@ defmodule GitNotesWeb do
       use Phoenix.HTML
 
       # Import basic rendering functionality (render, render_layout, etc)
+      import Phoenix.LiveView.Helpers
       import Phoenix.View
 
       import GitNotesWeb.ErrorHelpers

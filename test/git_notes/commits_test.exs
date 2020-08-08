@@ -44,11 +44,11 @@ defmodule GitNotes.CommitsTest do
     commit1 = Commits.create_commit(@valid_attrs)
     commit2 = Commits.create_commit(%{@valid_attrs | "sha" => "a65sd74r8we", "message" => "different message"})
 
-    commits = Commits.list_commits_by_repo(repo)
+    commits = Commits.list_repo_commits(repo)
     assert commit1 in commits
     assert commit2 in commits
 
-    user_commits = Commits.list_commits_by_user(user)
+    user_commits = Commits.list_user_commits(user)
 
     assert commit1 in user_commits
     assert commit2 in user_commits

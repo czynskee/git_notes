@@ -4,9 +4,11 @@ defmodule GitNotesWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
+    plug :fetch_live_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :put_root_layout, {GitNotesWeb.LayoutView, :root}
+    plug GitNotesWeb.Auth
   end
 
   pipeline :api do
@@ -19,7 +21,12 @@ defmodule GitNotesWeb.Router do
     get "/", PageController, :index
     resources "/users", UserController, only: [:new]
     get "/users/install", UserController, :install
-    resources "/sessions", SessionController, only: [:new]
+    resources "/sessions", SessionController, only: [:new, :delete]
+  end
+
+  scope "/notes", GitNotesWeb do
+    pipe_through [:browser, :authenticate]
+    live "/", NotesLive
   end
 
   scope "/webhooks", GitNotesWeb do

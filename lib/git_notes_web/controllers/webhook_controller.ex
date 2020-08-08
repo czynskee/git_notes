@@ -32,22 +32,20 @@ defmodule GitNotesWeb.WebhookController do
     get_in(payload, ["installation", "account"])
     |> Map.put("installation_id", installation_id)
 
-    Accounts.register_user(user)
+    user = Accounts.register_user(user)
 
-    get_in(payload, ["repositories"])
-    |> Enum.each(fn repo ->
-      repo
-      |> Map.put("user_id", user["id"])
-      |> GitRepos.create_repo()
-    end)
+    GitRepos.create_repos_for_user(user, payload)
 
     send_resp(conn, 200, "")
   end
 
   def webhook(conn,
     %{"action" => "deleted", "installation" => %{"id" => installation_id, "app_id" => @app_id}}) do
-    Accounts.get_user_by([installation_id: installation_id])
-    |> Accounts.delete_user()
+    user = Accounts.get_user_by([installation_id: installation_id])
+
+    if user do
+      Accounts.delete_user(user)
+    end
 
     send_resp(conn, 200, "")
   end
