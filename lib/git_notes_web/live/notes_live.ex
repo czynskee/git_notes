@@ -4,17 +4,32 @@ defmodule GitNotesWeb.NotesLive do
 
   def render(assigns) do
     ~L"""
-    Hello! <%= @user.login %>
+    <div>
+      <%= @file.name %>
+    </div>
+    <textarea id="notes-textarea" phx-hook="NotesHook" data-content="<%= @file.content %>" > </textarea>
+    <%= for commit <- @commits do %>
+      <div>
+        <%= commit.message %>
+      </div>
+
+    <% end %>
+
     """
   end
 
   def mount(params, session, socket) do
     user_id = session["user_id"]
-    IO.inspect Notes.list_user_files(user_id)
-    IO.inspect Commits.list_user_commits(user_id)
+    date = DateTime.now("Etc/UTC") |> elem(1)
+    current_file = Notes.get_file_by_date(user_id, date)
+    days_commits = Commits.get_commits_by_date(user_id, date)
+
+    IO.inspect days_commits
 
     socket = socket
     |> assign(:user, Accounts.get_user(user_id))
-    {:ok, assign(socket, :message, "a message")}
+    |> assign(:file, current_file)
+    |> assign(:commits, days_commits)
+    {:ok, assign(socket, :file, current_file)}
   end
 end

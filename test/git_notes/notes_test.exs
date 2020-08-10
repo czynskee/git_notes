@@ -1,7 +1,7 @@
 defmodule GitNotes.NotesTest do
   use GitNotes.DataCase, async: true
 
-  alias GitNotes.Notes
+  alias GitNotes.{Notes, Accounts}
   alias GitNotes.Notes.File
 
   @valid_attrs %{
@@ -17,9 +17,9 @@ defmodule GitNotes.NotesTest do
   }
 
   setup do
-    fixtures()
+    fixtures = fixtures()
 
-    :ok
+    {:ok, fixtures: fixtures}
   end
 
   test "CRUD file" do
@@ -49,6 +49,24 @@ defmodule GitNotes.NotesTest do
     repo = repo_fixture(%{"user_id" => user.id, "id" => 9999})
 
     %File{} = Notes.create_file(%{@valid_attrs | "git_repo_id" => repo.id})
+  end
+
+  test "delete user files", %{fixtures: fixtures} do
+    Notes.create_file(@valid_attrs)
+    Notes.create_file(%{@valid_attrs | "name" => "2020-07-14.md"})
+
+    other_user = user_fixture(%{"id" => 000, "installation_id" => 111, "login" => "other"})
+    other_repo = repo_fixture(%{"id" => 999, "user_id" => other_user.id})
+    Accounts.update_user(other_user, %{"notes_repo_id" => other_repo.id})
+    Notes.create_file(%{@valid_attrs | "git_repo_id" => other_repo.id})
+
+    Notes.list_user_files(other_user.id)
+
+    Notes.delete_user_files(fixtures.user.id)
+
+    assert length(Notes.list_user_files(fixtures.user.id)) == 0
+
+    assert length(Notes.list_user_files(other_user.id)) == 1
   end
 
 

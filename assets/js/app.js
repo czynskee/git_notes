@@ -13,13 +13,24 @@ import "../css/app.scss"
     // import socket from "./socket"
 //
 import "phoenix_html"
+import SimpleMDE from "simplemde"
+
+let Hooks = {
+  NotesHook: {
+    mounted() {
+      let content = this.el.getAttribute("data-content")
+      this.el.textContent = atob(content)
+    }
+  }
+}
+
 
 
 import {Socket} from "phoenix"
 import LiveSocket from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 liveSocket.connect()
 
@@ -30,3 +41,5 @@ liveSocket.connect()
 // Call disableLatencySim() to disable:
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+

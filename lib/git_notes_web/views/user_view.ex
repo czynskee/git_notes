@@ -6,4 +6,8 @@ defmodule GitNotesWeb.UserView do
     @app_name
   end
 
+  def get_notes_repo(repos, user) do
+    Enum.find(repos, & &1.id == user.notes_repo_id)
+  end
+
 end

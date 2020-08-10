@@ -17,10 +17,7 @@ defmodule GitNotes.Notes do
   end
 
   def list_user_files(user_id) when is_integer(user_id) do
-    Repo.all from u in Accounts.User,
-    join: f in File, on: f.git_repo_id == u.notes_repo_id,
-    where: u.id == ^user_id,
-    select: f
+    Repo.all user_files_query(user_id)
   end
 
   def list_repo_files(repo_id) when is_integer(repo_id) do
@@ -30,6 +27,23 @@ defmodule GitNotes.Notes do
   def get_file_by(repo_id, params) do
     params = Map.put(params, :git_repo_id, repo_id)
     Repo.get_by(File, params)
+  end
+
+  def get_file_by_date(user_id, date) do
+    query = user_files_query(user_id)
+    (from f in query,
+    where: f.file_name_date <= ^date,
+    order_by: [desc: f.file_name_date],
+    limit: 1)
+    |> Repo.all
+    |> Enum.at(0)
+  end
+
+  defp user_files_query(user_id) do
+    from f in File,
+    join: u in Accounts.User, on: f.git_repo_id == u.notes_repo_id,
+    where: u.id == ^user_id,
+    select: f
   end
 
   defp repo_files_query(repo_id) do
@@ -55,6 +69,10 @@ defmodule GitNotes.Notes do
     file
     |> File.update_changeset(attrs)
     |> Repo.update!()
+  end
+
+  def delete_user_files(user_id) do
+    Repo.delete_all user_files_query(user_id)
   end
 
 

@@ -24,6 +24,7 @@ defmodule GitNotesWeb do
       import Plug.Conn
       import GitNotesWeb.Gettext
       import Phoenix.LiveView.Controller
+      import GitNotesWeb.Auth, only: [authenticate: 2]
 
       alias GitNotesWeb.Router.Helpers, as: Routes
     end

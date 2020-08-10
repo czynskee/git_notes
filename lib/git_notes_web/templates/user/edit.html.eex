@@ -1,0 +1,16 @@
+<%= link "Back", to: Routes.user_path(@conn, :show, @current_user.id) %>
+
+<h2> Edit User </h2>
+
+<%= form_for @changeset, Routes.user_path(@conn, :update, @current_user.id), fn f -> %>
+  <%= for repo <- @repos do %>
+    <label>
+      <%= radio_button f, :notes_repo_id, repo.id %>
+      <%= repo.name %>
+    </label>
+
+    <% end %>
+
+    <%= submit "Choose Notes Repo"%>
+<% end %>
+

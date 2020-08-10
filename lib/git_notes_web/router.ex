@@ -19,10 +19,11 @@ defmodule GitNotesWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    resources "/users", UserController, only: [:new]
     get "/users/install", UserController, :install
+    resources "/users", UserController, only: [:new, :show, :edit, :update]
     resources "/sessions", SessionController, only: [:new, :delete]
   end
+
 
   scope "/notes", GitNotesWeb do
     pipe_through [:browser, :authenticate]

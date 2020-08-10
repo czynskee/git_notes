@@ -1,49 +1,40 @@
 defmodule GitNotesWeb.UserController do
   use GitNotesWeb, :controller
 
+  alias GitNotes.{GitRepos, Accounts, Notes, Github}
+
+  plug :authenticate when action in [:show, :edit, :update]
+
   def new(conn, _params) do
     render(conn, "new.html")
   end
 
+  def show(conn, _params) do
+    conn
+    |> assign(:repos, GitRepos.list_user_repos(conn.assigns.current_user))
+    |> assign(:notes_repo_id, conn.assigns.current_user.notes_repo_id)
+    |> render("show.html")
+  end
 
-  # def install(conn, %{"code" => code, "installation_id" => installation_id, "setup_action" => "install"}) do
-  #   case GitNotes.Github.get_access_token(code) do
-  #     :error ->
-  #       install_error(conn)
-  #     {:ok, %{"error" => _error}} ->
-  #       install_error(conn)
-  #     {:ok, response} ->
-  #       user = Github.get_user(response["access_token"])
-  #       refresh_expiration =
-  #         DateTime.now("Etc/UTC")
-  #         |> elem(1)
-  #         |> DateTime.add(
-  #         response["refresh_token_expires_in"] |> Integer.parse() |> elem(0))
+  def edit(conn, _params) do
+    conn
+    |> assign(:repos, GitRepos.list_user_repos(conn.assigns.current_user))
+    |> assign(:changeset, Accounts.change_user(conn.assigns.current_user))
+    |> render("edit.html")
+  end
 
-  #       case GitNotes.Accounts.register_user(%{
-  #         login: user["login"],
-  #         id: user["id"],
-  #         installation_id: installation_id,
-  #         refresh_token: response["refresh_token"],
-  #         refresh_token_expiration: refresh_expiration
-  #       }) do
-  #         {:error, _} -> install_error(conn)
-  #         {:ok, _user} ->
-  #           conn
-  #             |> put_flash(:info, "Successful installation")
-  #             |> redirect(to: "/")
-  #       end
-  #   end
-  # end
+  def update(conn, %{"user" => %{"notes_repo_id" => updated_repo_id} = updated_user}) do
+    %{current_user: current_user} = conn.assigns
+    if current_user.notes_repo_id && current_user.notes_repo_id != Integer.parse(updated_repo_id) do
+      Notes.delete_user_files(current_user.id)
+    end
 
-  # def install(conn, _params) do
-  #   conn
-  #   |> redirect(to: "/")
-  # end
+    new_user = Accounts.update_user(current_user, updated_user)
 
-  # def install_error(conn) do
-  #   conn
-  #   |> put_flash(:error, "There was an error processing your request. Please try again.")
-  #   |> redirect(to: "/")
-  # end
+    Github.populate_notes(new_user.notes_repo_id)
+
+    redirect(conn, to: Routes.user_path(conn, :show, conn.assigns.current_user.id))
+  end
+
+
 end

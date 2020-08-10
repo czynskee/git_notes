@@ -12,6 +12,10 @@ defmodule GitNotes.Accounts do
     |> Repo.insert!()
   end
 
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
+
   def get_user_by(params) do
     Repo.get_by(User, params)
   end

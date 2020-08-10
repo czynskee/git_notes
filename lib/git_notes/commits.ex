@@ -10,14 +10,26 @@ defmodule GitNotes.Commits do
   end
 
   def list_user_commits(user_id) when is_integer(user_id) do
+    user_commits_query(user_id)
+    |> Repo.all
+  end
+
+  def user_commits_query(user_id) do
     (from c in Commit,
     join: r in GitRepos.GitRepo, on: r.id == c.git_repo_id,
     where: r.user_id == ^user_id)
-    |> Repo.all
   end
 
   def list_repo_commits(%GitNotes.GitRepos.GitRepo{id: repo_id}) do
     repo_commits_query(repo_id)
+    |> Repo.all
+  end
+
+  def get_commits_by_date(user_id, date) do
+    query = user_commits_query(user_id)
+    (from c in query,
+    where: c.commit_date <= ^date,
+    order_by: [desc: c.commit_date])
     |> Repo.all
   end
 

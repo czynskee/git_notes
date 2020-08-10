@@ -12,6 +12,8 @@ defmodule GitNotesWeb.Auth do
   def call(conn, _opts) do
     user_id = get_session(conn, :user_id)
     cond do
+      user = conn.assigns[:current_user] ->
+        put_current_user(conn, user)
       user = user_id && Accounts.get_user(user_id) ->
         put_current_user(conn, user)
       true ->

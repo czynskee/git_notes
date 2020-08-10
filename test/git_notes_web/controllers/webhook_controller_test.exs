@@ -141,7 +141,7 @@ defmodule GitNotesWeb.WebhookControllerTest do
 
     sign_request_and_post(conn, "/webhooks", push_commits_payload())
 
-    commits = Commits.list_commits_by_repo(repo)
+    commits = Commits.list_repo_commits(repo)
 
     assert length(commits) === 3
     assert Enum.find(commits, &(&1.message == "commit message"))

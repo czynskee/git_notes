@@ -1,0 +1,21 @@
+<%= link "Edit User Settings", to: Routes.user_path(@conn, :edit, @current_user.id) %>
+
+<%= if @current_user.notes_repo_id do %>
+
+<h4> Notes Repo: <%= get_notes_repo(@repos, @current_user).name %> <h4>
+
+<% end %>
+
+
+All repos:
+
+  <%= Enum.map(@repos, fn repo -> %>
+
+    <li>
+      <%= repo.name %>
+    </li>
+
+<% end) %>
+
+
+
