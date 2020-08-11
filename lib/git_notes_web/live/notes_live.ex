@@ -8,7 +8,7 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def mount(_params, session, socket) do
-    GitNotesWeb.Endpoint.subscribe("user:#{session["user_id"]}")
+    GitNotesWeb.Endpoint.subscribe("user#{session["user_id"]}")
 
     socket = socket
     |> assign(:user_id, session["user_id"])
@@ -17,9 +17,8 @@ defmodule GitNotesWeb.NotesLive do
     {:ok, get_days_info(socket, Date.utc_today())}
   end
 
-  def handle_info(event, socket) do
-    IO.inspect event
-    {:noreply, socket}
+  def handle_event(%{"event" => "new_commits"}, socket) do
+    {:reply, %{}, get_commit_info(socket)}
   end
 
   def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
@@ -54,13 +53,19 @@ defmodule GitNotesWeb.NotesLive do
   defp get_days_info(socket, date) do
     user_id = socket.assigns.user_id
     current_file = Notes.get_file_by_date(user_id, date)
-    days_commits = Commits.get_commits_by_date(user_id, date)
 
     socket
     |> assign(:date, date)
     |> assign(:editing, false)
     |> assign(:user, Accounts.get_user(user_id))
     |> assign(:file, current_file)
+    |> get_commit_info
+  end
+
+  defp get_commit_info(socket) do
+    days_commits = Commits.get_commits_by_date(socket.assigns.user.id, socket.assigns.date)
+
+    socket
     |> assign(:commits, days_commits)
   end
 end

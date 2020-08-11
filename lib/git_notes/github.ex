@@ -101,7 +101,6 @@ defmodule GitNotes.Github do
           "path" => date_string <> ".md",
           "mode" => "100644", # blob
           "type" => "blob",
-          # "sha" => blob_response["sha"],
           "content" => content
         }
       ]
