@@ -17,9 +17,12 @@ defmodule GitNotesWeb.NotesLive do
     {:ok, get_days_info(socket, Date.utc_today())}
   end
 
-  def handle_info(event, socket) do
-    IO.inspect event
+  def handle_info(%{event: "new_commits"}, socket) do
     {:noreply, get_commit_info(socket)}
+  end
+
+  def handle_info(%{event: "updated_file"}, socket) do
+    {:noreply, get_file_info(socket)}
   end
 
   def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
@@ -53,14 +56,13 @@ defmodule GitNotesWeb.NotesLive do
 
   defp get_days_info(socket, date) do
     user_id = socket.assigns.user_id
-    current_file = Notes.get_file_by_date(user_id, date)
 
     socket
     |> assign(:date, date)
     |> assign(:editing, false)
     |> assign(:user, Accounts.get_user(user_id))
-    |> assign(:file, current_file)
-    |> get_commit_info
+    |> get_file_info()
+    |> get_commit_info()
   end
 
   defp get_commit_info(socket) do
@@ -68,5 +70,12 @@ defmodule GitNotesWeb.NotesLive do
 
     socket
     |> assign(:commits, days_commits)
+  end
+
+  defp get_file_info(socket) do
+    current_file = Notes.get_file_by_date(socket.assigns.user.id, socket.assigns.date)
+
+    socket
+    |> assign(:file, current_file)
   end
 end

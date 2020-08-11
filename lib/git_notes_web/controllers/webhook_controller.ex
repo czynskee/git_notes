@@ -89,6 +89,7 @@ defmodule GitNotesWeb.WebhookController do
 
     if user do
       Github.update_notes_files(user, payload["head_commit"])
+      GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "updated_file", %{})
     end
 
     send_resp(conn, 200, "")
