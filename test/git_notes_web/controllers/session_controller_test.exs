@@ -103,7 +103,7 @@ defmodule GitNotesWeb.SessionControllerTest do
       }
     end)
     |> expect(:get_installation_access_token, fn _id ->
-      {:ok, %{"token" => "12345"}}
+      installation_access_token_response()
     end)
     |> expect(:get_installation_repos, fn _token ->
       {:ok,

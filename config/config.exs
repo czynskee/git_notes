@@ -16,6 +16,7 @@ config :git_notes,
   github_api_url: "https://api.github.com",
   github_api_version: "application/vnd.github.v3+json",
   github_app_id: 73363,
+  app_name: "Gitgeneering Day Book",
   http_adapter: HTTPoison,
   github_api: GitNotes.GithubAPI.HTTP,
   public_app_name: "gitautonotes"
@@ -31,8 +32,8 @@ config :git_notes, GitNotesWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "YPzoNJDvRInI3R3hCjVvRZ/7ps/q3bi03JEjeuIG24e/a66n7XmHeaIl24DaD5M8",
   render_errors: [view: GitNotesWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: GitNotes.PubSub,
-  live_view: [signing_salt: "EVIQS8vy"]
+  pubsub_server: GitNotes.PubSub, name: :git_notes_pubsub,
+  live_view: [signing_salt: System.get_env("LIVE_VIEW_SIGNING_SALT")]
 
 # Configures Elixir's Logger
 config :logger, :console,

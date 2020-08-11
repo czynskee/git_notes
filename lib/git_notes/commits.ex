@@ -28,7 +28,7 @@ defmodule GitNotes.Commits do
   def get_commits_by_date(user_id, date) do
     query = user_commits_query(user_id)
     (from c in query,
-    where: c.commit_date <= ^date,
+    where: c.commit_date == ^date,
     order_by: [desc: c.commit_date])
     |> Repo.all
   end
@@ -38,10 +38,16 @@ defmodule GitNotes.Commits do
     where: c.git_repo_id == ^repo_id
   end
 
-  def create_commit(attrs) do
+  def create_commit!(attrs) do
     %Commit{}
     |> Commit.changeset(attrs)
     |> Repo.insert!()
+  end
+
+  def create_commit(attrs) do
+    %Commit{}
+    |> Commit.changeset(attrs)
+    |> Repo.insert()
   end
 
   def get_commit(id) do

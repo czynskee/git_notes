@@ -18,9 +18,7 @@ defmodule GitNotesWeb.UserControllerTest do
   test "PUT /users/update", %{conn: conn} do
     Mock
     |> expect(:get_installation_access_token, fn _installation_id ->
-      {:ok, %{
-        "token" => "heresatoken"
-      }}
+      installation_access_token_response()
     end)
     |> expect(:get_repo_contents, fn _token, _user, _repo ->
       {:ok, [

@@ -29,7 +29,7 @@ defmodule GitNotes.GithubTest do
   test "get installation access token" do
     Mock
       |> expect(:get_installation_access_token, fn(_installation_id) ->
-        {:ok, %{"token" => 12345, "expires_at" => (DateTime.now("Etc/UTC") |> elem(1) |> DateTime.add(60 * 60))}}
+        installation_access_token_response()
       end)
 
     Github.get_installation_access_token(12345)
@@ -67,9 +67,7 @@ defmodule GitNotes.GithubTest do
       }
     end)
     |> expect(:get_installation_access_token, fn(_installation_id) ->
-      {:ok, %{
-        "token" => "heresatoken"
-      }}
+      installation_access_token_response()
     end)
 
     Github.populate_notes(repo.id)

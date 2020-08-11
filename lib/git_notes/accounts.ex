@@ -28,7 +28,6 @@ defmodule GitNotes.Accounts do
     get_user(user.id)
   end
 
-
   def get_user_and_notes_repo(repo_id) do
     Repo.get_by(User, [notes_repo_id: repo_id])
     |> Repo.preload(:notes_repo)
@@ -52,5 +51,11 @@ defmodule GitNotes.Accounts do
     user
     |> User.github_credentials_changeset(credentials)
     |> Repo.update!()
+  end
+
+  def update_installation_access_token(%User{} = user, credentials) do
+    user
+    |> User.installation_access_token_changeset(credentials)
+    |> Repo.update()
   end
 end

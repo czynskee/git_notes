@@ -2,7 +2,7 @@ defmodule GitNotesWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", GitNotesWeb.RoomChannel
+  channel "user:*", GitNotesWeb.UserChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

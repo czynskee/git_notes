@@ -1,0 +1,23 @@
+<button phx-click="previous_day"> Previous </button>
+<button phx-click="next_day"> Next </button>
+
+<div>
+  <%= @date %>
+</div>
+<%= f = form_for @file_changeset, "#", [phx_submit: :commit_notes] %>
+  <%= label f, :content %>
+  <%= textarea f, :content, readonly: !@editing, value: @file && decode_file(@file) %>
+
+  <%= submit (@editing && "Commit and Push") || "Edit Notes" %>
+</form>
+
+
+<%= for commit <- @commits do %>
+  <div>
+    <%= commit.sha %>
+    <%= commit.author %>
+    <%= commit.commit_date %>
+    <%= commit.message %>
+  </div>
+
+<% end %>

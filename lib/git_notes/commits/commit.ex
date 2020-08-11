@@ -8,7 +8,7 @@ defmodule GitNotes.Commits.Commit do
     field :message, :string
     field :distinct, :boolean
     field :author, :string
-    field :commit_date, :utc_datetime
+    field :commit_date, :date
     belongs_to :git_repo, GitNotes.GitRepos.GitRepo
 
     timestamps()
@@ -16,9 +16,10 @@ defmodule GitNotes.Commits.Commit do
 
   def changeset(commit, attrs) do
     commit
-    |> cast(attrs, [:ref, :sha, :commit_date, :message, :sha, :distinct, :author, :git_repo_id])
+    |> cast(attrs, [:ref, :sha, :commit_date, :message, :distinct, :author, :git_repo_id])
     |> foreign_key_constraint(:git_repo_id)
     |> validate_required([:ref, :sha, :commit_date, :message, :sha, :author, :git_repo_id])
+    |> unique_constraint(:sha)
   end
 
 end

@@ -32,7 +32,7 @@ defmodule GitNotes.Notes do
   def get_file_by_date(user_id, date) do
     query = user_files_query(user_id)
     (from f in query,
-    where: f.file_name_date <= ^date,
+    where: f.file_name_date == ^date,
     order_by: [desc: f.file_name_date],
     limit: 1)
     |> Repo.all
@@ -73,6 +73,10 @@ defmodule GitNotes.Notes do
 
   def delete_user_files(user_id) do
     Repo.delete_all user_files_query(user_id)
+  end
+
+  def change_file(%File{} = file, attrs \\ %{}) do
+    File.changeset(file, attrs)
   end
 
 

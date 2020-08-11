@@ -36,6 +36,8 @@ defmodule GitNotesWeb.WebhookController do
 
     GitRepos.create_repos_for_user(user, payload)
 
+    Github.populate_commits(user)
+
     send_resp(conn, 200, "")
   end
 
@@ -73,10 +75,15 @@ defmodule GitNotesWeb.WebhookController do
     commits
     |> Enum.map(&(Map.put(&1, "git_repo_id", repo_id)))
     |> Enum.map(&(Map.put(&1, "author", get_in(&1, ["author", "username"]))))
-    |> Enum.map(&(Map.put(&1, "commit_date", DateTime.from_iso8601(&1["timestamp"]) |> elem(1))))
+    |> Enum.map(&(Map.put(&1, "commit_date",
+      &1["timestamp"]
+      |> String.split("T") |> Enum.at(0) |> Date.from_iso8601() |> elem(1))))
     |> Enum.map(&(Map.put(&1, "sha", &1["id"])))
     |> Enum.map(&(Map.put(&1, "ref", ref)))
     |> Enum.each(&(Commits.create_commit(&1)))
+
+    repo = GitRepos.get_repo(repo_id)
+    GitNotesWeb.Endpoint.broadcast("user:#{repo.user_id}", "new_commits", %{})
 
     user = Accounts.get_user_and_notes_repo(repo_id)
 

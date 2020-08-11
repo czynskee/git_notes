@@ -195,4 +195,11 @@ defmodule GitNotes.TestHelpers do
     |> DateTime.to_unix()
   end
 
+  def installation_access_token_response() do
+    {:ok, %{
+      "token" => "heresatoken",
+      "expires_at" => "2016-07-11T22:14:10Z"
+    }}
+  end
+
 end
