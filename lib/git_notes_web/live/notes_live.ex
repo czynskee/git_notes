@@ -17,7 +17,7 @@ defmodule GitNotesWeb.NotesLive do
     {:ok, get_days_info(socket, Date.utc_today())}
   end
 
-  def handle_event(%{"event" => "new_commits"}, socket) do
+  def handle_event(%{"event" => "new_commits"} = event, socket) do
     {:reply, %{}, get_commit_info(socket)}
   end
 
