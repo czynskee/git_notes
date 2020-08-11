@@ -19,7 +19,7 @@ defmodule GitNotesWeb.NotesLive do
 
   def handle_info(event, socket) do
     IO.inspect event
-    {:noreply, socket}
+    {:noreply, get_commit_info(socket)}
   end
 
   def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
