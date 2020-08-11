@@ -83,7 +83,7 @@ defmodule GitNotesWeb.WebhookController do
     |> Enum.each(&(Commits.create_commit(&1)))
 
     repo = GitRepos.get_repo(repo_id)
-    GitNotesWeb.Endpoint.broadcast("user:#{repo.user_id}", "new_commits", %{})
+    GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "new_commits", %{})
 
     user = Accounts.get_user_and_notes_repo(repo_id)
 
