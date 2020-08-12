@@ -7,6 +7,7 @@ defmodule GitNotes.Notes.File do
     field :name, :string
     field :file_name_date, :date
     belongs_to :git_repo, GitNotes.GitRepos.GitRepo, foreign_key: :git_repo_id
+    has_many :topics, GitNotes.Notes.Topic
 
     timestamps()
   end

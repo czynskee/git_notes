@@ -175,6 +175,12 @@ defmodule GitNotesWeb.WebhookControllerTest do
     |> expect(:get_installation_access_token, fn(_installation_id) ->
       installation_access_token_response()
     end)
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      installation_access_token_response()
+    end)
+    |> expect(:get_installation_access_token, fn(_installation_id) ->
+      installation_access_token_response()
+    end)
     |> expect(:get_file_contents, fn(_token, _user, _repo, "2020-08-01.md") ->
       {:ok, %{
         "name" => "2020-08-01.md",

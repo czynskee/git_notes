@@ -12,29 +12,9 @@ import "../css/app.scss"
     // import {Socket} from "phoenix"
     // import socket from "./socket"
 //
-import "phoenix_html"
-import SimpleMDE from "simplemde"
 
 let Hooks = {
-  NotesHook: {
-    mounted() {
-      get_content(this.el)
-    },
-    beforeUpdate() {
-      let content = this.el.getAttribute("data-content")
-      console.log(atob(content))
-      this.el.textContent = atob(content)
-      // get_content(this.el)
-    }
-  }
 }
-
-function get_content(el) {
-  // let content = el.getAttribute("data-content")
-  // el.textContent = atob(content)
-}
-
-
 
 import {Socket} from "phoenix"
 import LiveSocket from "phoenix_live_view"
