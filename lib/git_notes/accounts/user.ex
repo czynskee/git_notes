@@ -14,6 +14,7 @@ defmodule GitNotes.Accounts.User do
     field :installation_access_token, :string
     field :installation_access_token_expiration, :utc_datetime
     has_many :repos, GitNotes.GitRepos.GitRepo
+    has_many :topics, GitNotes.Notes.Topic
     belongs_to :notes_repo, GitNotes.GitRepos.GitRepo, foreign_key: :notes_repo_id
 
 

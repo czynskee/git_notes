@@ -42,8 +42,9 @@ defmodule GitNotesWeb.WebhookController do
   end
 
   def webhook(conn,
-    %{"action" => "deleted", "installation" => %{"id" => installation_id, "app_id" => @app_id}}) do
+    %{"action" => "deleted", "installation" => %{"id" => installation_id, "account" => %{"login" => login}, "app_id" => @app_id}}) do
     user = Accounts.get_user_by([installation_id: installation_id])
+    user = user || Accounts.get_user_by([login: login])
 
     if user do
       Accounts.delete_user(user)

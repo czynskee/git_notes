@@ -4,7 +4,6 @@ defmodule GitNotes.Repo.Migrations.CreateFiles do
   def change do
     create table(:files) do
       add :name, :string
-      add :content, :text
       add :file_name_date, :date
       add :git_repo_id, references(:repos, on_delete: :delete_all)
 

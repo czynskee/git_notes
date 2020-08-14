@@ -1,6 +1,6 @@
 defmodule GitNotes.Notes do
   alias GitNotes.Repo
-  alias GitNotes.Notes.File
+  alias GitNotes.Notes.{File, Topic, TopicEntry}
   alias GitNotes.Accounts
   alias GitNotes.GitRepos
 
@@ -10,6 +10,28 @@ defmodule GitNotes.Notes do
     %File{}
     |> File.changeset(attrs)
     |> Repo.insert!()
+  end
+
+  def create_or_update_file(attrs) do
+    case get_file_by(attrs["git_repo_id"], %{name: attrs["name"]}) do
+      nil ->
+        create_file(attrs)
+      file ->
+        update_file(file, attrs)
+    end
+  end
+
+  def create_topics_from_entries(topic_entries, user_id, file_date) do
+    topic_entries
+    |> Enum.map(fn {heading, name, entry} ->
+      name = name || "notes from " <> (file_date |> Date.to_string())
+      heading = heading || "# " <> name
+      topic = case get_user_topic_by_name(user_id, name) do
+        nil -> create_topic(%{heading: heading, name: name, user_id: user_id}) |> elem(1)
+        topic -> topic
+      end
+      {topic, entry}
+    end)
   end
 
   def list_user_files(%Accounts.User{id: id}) do
@@ -31,12 +53,14 @@ defmodule GitNotes.Notes do
 
   def get_file_by_date(user_id, date) do
     query = user_files_query(user_id)
-    (from f in query,
-    where: f.file_name_date == ^date,
-    order_by: [desc: f.file_name_date],
-    limit: 1)
-    |> Repo.all
-    |> Enum.at(0)
+    Repo.one (from file in query,
+    join: entries in assoc(file, :topic_entries),
+    join: topics in assoc(entries, :topic),
+    where: file.file_name_date == ^date,
+    order_by: [desc: file.file_name_date],
+    limit: 1,
+    preload: [topic_entries: {entries, topic: topics}])
+
   end
 
   defp user_files_query(user_id) do
@@ -67,6 +91,7 @@ defmodule GitNotes.Notes do
 
   def update_file(%File{} = file, attrs) do
     file
+    |> Repo.preload(:topic_entries)
     |> File.update_changeset(attrs)
     |> Repo.update!()
   end
@@ -78,11 +103,6 @@ defmodule GitNotes.Notes do
   def change_file(%File{} = file, attrs \\ %{}) do
     File.changeset(file, attrs)
   end
-
-
-
-
-  alias GitNotes.Notes.Topic
 
   @doc """
   Returns the list of topics.
@@ -96,6 +116,34 @@ defmodule GitNotes.Notes do
   def list_topics do
     Repo.all(Topic)
   end
+
+  def list_user_topics(user_id) do
+    user_topics_query(user_id)
+    |> Repo.all()
+  end
+
+  def user_topics_query(user_id) do
+    (from t in Topic,
+     where: t.user_id == ^user_id,
+     select: t)
+  end
+
+  def get_user_topic_by_name(user_id, name) do
+    (from t in user_topics_query(user_id),
+    where: t.name == ^name)
+    |> Repo.one()
+  end
+
+  # def list_last_user_topics(%GitNotes.Accounts.User{} = user) do
+  #   user_files = user_files_query(user.id)
+  #   |> exclude(:select)
+  #   (from f in user_files,
+  #   join: t in Topic, on: t.file_id == f.id,
+  #   distinct: t.name,
+  #   order_by: [desc: f.file_name_date],
+  #   select: t)
+  #   |> Repo.all()
+  # end
 
   @doc """
   Gets a single topic.
@@ -111,7 +159,9 @@ defmodule GitNotes.Notes do
       ** (Ecto.NoResultsError)
 
   """
-  def get_topic!(id), do: Repo.get!(Topic, id)
+  def get_topic!(id) do
+    Repo.get!(Topic, id)
+  end
 
   @doc """
   Creates a topic.
@@ -176,5 +226,100 @@ defmodule GitNotes.Notes do
   """
   def change_topic(%Topic{} = topic, attrs \\ %{}) do
     Topic.changeset(topic, attrs)
+  end
+
+
+  @doc """
+  Returns the list of topic_entries.
+
+  ## Examples
+
+      iex> list_topic_entries()
+      [%TopicEntry{}, ...]
+
+  """
+  def list_topic_entries do
+    Repo.all(TopicEntry)
+  end
+
+  @doc """
+  Gets a single topic_entry.
+
+  Raises `Ecto.NoResultsError` if the Topic entry does not exist.
+
+  ## Examples
+
+      iex> get_topic_entry!(123)
+      %TopicEntry{}
+
+      iex> get_topic_entry!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_topic_entry!(id), do: Repo.get!(TopicEntry, id)
+
+  @doc """
+  Creates a topic_entry.
+
+  ## Examples
+
+      iex> create_topic_entry(%{field: value})
+      {:ok, %TopicEntry{}}
+
+      iex> create_topic_entry(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_topic_entry(attrs \\ %{}) do
+    %TopicEntry{}
+    |> TopicEntry.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a topic_entry.
+
+  ## Examples
+
+      iex> update_topic_entry(topic_entry, %{field: new_value})
+      {:ok, %TopicEntry{}}
+
+      iex> update_topic_entry(topic_entry, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_topic_entry(%TopicEntry{} = topic_entry, attrs) do
+    topic_entry
+    |> TopicEntry.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a topic_entry.
+
+  ## Examples
+
+      iex> delete_topic_entry(topic_entry)
+      {:ok, %TopicEntry{}}
+
+      iex> delete_topic_entry(topic_entry)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_topic_entry(%TopicEntry{} = topic_entry) do
+    Repo.delete(topic_entry)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking topic_entry changes.
+
+  ## Examples
+
+      iex> change_topic_entry(topic_entry)
+      %Ecto.Changeset{data: %TopicEntry{}}
+
+  """
+  def change_topic_entry(%TopicEntry{} = topic_entry, attrs \\ %{}) do
+    TopicEntry.changeset(topic_entry, attrs)
   end
 end

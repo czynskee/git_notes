@@ -133,4 +133,63 @@ defmodule GitNotes.NotesTest do
   #     assert %Ecto.Changeset{} = Notes.change_topic(topic)
   #   end
   # end
+
+  describe "topic_entries" do
+    alias GitNotes.Notes.TopicEntry
+
+    @valid_attrs %{content: "some content"}
+    @update_attrs %{content: "some updated content"}
+    @invalid_attrs %{content: nil}
+
+    def topic_entry_fixture(attrs \\ %{}) do
+      {:ok, topic_entry} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Notes.create_topic_entry()
+
+      topic_entry
+    end
+
+    test "list_topic_entries/0 returns all topic_entries" do
+      topic_entry = topic_entry_fixture()
+      assert Notes.list_topic_entries() == [topic_entry]
+    end
+
+    test "get_topic_entry!/1 returns the topic_entry with given id" do
+      topic_entry = topic_entry_fixture()
+      assert Notes.get_topic_entry!(topic_entry.id) == topic_entry
+    end
+
+    test "create_topic_entry/1 with valid data creates a topic_entry" do
+      assert {:ok, %TopicEntry{} = topic_entry} = Notes.create_topic_entry(@valid_attrs)
+      assert topic_entry.content == "some content"
+    end
+
+    test "create_topic_entry/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Notes.create_topic_entry(@invalid_attrs)
+    end
+
+    test "update_topic_entry/2 with valid data updates the topic_entry" do
+      topic_entry = topic_entry_fixture()
+      assert {:ok, %TopicEntry{} = topic_entry} = Notes.update_topic_entry(topic_entry, @update_attrs)
+      assert topic_entry.content == "some updated content"
+    end
+
+    test "update_topic_entry/2 with invalid data returns error changeset" do
+      topic_entry = topic_entry_fixture()
+      assert {:error, %Ecto.Changeset{}} = Notes.update_topic_entry(topic_entry, @invalid_attrs)
+      assert topic_entry == Notes.get_topic_entry!(topic_entry.id)
+    end
+
+    test "delete_topic_entry/1 deletes the topic_entry" do
+      topic_entry = topic_entry_fixture()
+      assert {:ok, %TopicEntry{}} = Notes.delete_topic_entry(topic_entry)
+      assert_raise Ecto.NoResultsError, fn -> Notes.get_topic_entry!(topic_entry.id) end
+    end
+
+    test "change_topic_entry/1 returns a topic_entry changeset" do
+      topic_entry = topic_entry_fixture()
+      assert %Ecto.Changeset{} = Notes.change_topic_entry(topic_entry)
+    end
+  end
 end

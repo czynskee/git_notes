@@ -3,6 +3,14 @@ defmodule GitNotesWeb.NotesView do
 
 
   def decode_file(file) do
-    file.content |> Base.decode64(ignore: :whitespace) |> elem(1)
+    file.topic_entries
+    |> Enum.sort(&(&1.file_location <= &2.file_location))
+    |> IO.inspect
+    |> Enum.map(& &1.topic.name <> "\n" <> (&1.content |> Base.decode64!(ignore: :whitespace)))
+    |> Enum.reduce(fn entry, file_content ->
+      file_content <> entry
+    end)
+
   end
+
 end

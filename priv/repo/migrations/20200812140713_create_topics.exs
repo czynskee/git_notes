@@ -4,13 +4,13 @@ defmodule GitNotes.Repo.Migrations.CreateTopics do
   def change do
     create table(:topics) do
       add :name, :string
-      add :file_id, references(:files, on_delete: :delete_all)
+      add :heading, :string
+      add :user_id, references(:users, on_delete: :delete_all), null: false
 
       timestamps()
     end
 
-    create index(:topics, [:name])
-    create unique_index(:topics, [:name, :file_id])
+    create unique_index(:topics, [:name, :user_id])
 
   end
 end
