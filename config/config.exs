@@ -21,6 +21,7 @@ config :git_notes,
   github_api: GitNotes.GithubAPI.HTTP,
   public_app_name: "gitautonotes"
 
+
 config :joken,
   default_signer: [
     signer_alg: "RS256",

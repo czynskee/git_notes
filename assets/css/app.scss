@@ -29,3 +29,14 @@
 .alert:empty {
   display: none;
 }
+
+.topic-entry {
+  white-space: pre-wrap;
+  border: none;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+.notes-textarea {
+  height: 400px;
+}

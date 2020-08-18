@@ -21,6 +21,7 @@ defmodule GitNotes.Notes do
     end
   end
 
+  @spec create_topics_from_entries(topic_entries :: any, user_id :: integer, file_date :: Date) :: any
   def create_topics_from_entries(topic_entries, user_id, file_date) do
     topic_entries
     |> Enum.map(fn {heading, name, entry} ->
@@ -52,15 +53,13 @@ defmodule GitNotes.Notes do
   end
 
   def get_file_by_date(user_id, date) do
-    query = user_files_query(user_id)
-    Repo.one (from file in query,
-    join: entries in assoc(file, :topic_entries),
-    join: topics in assoc(entries, :topic),
-    where: file.file_name_date == ^date,
-    order_by: [desc: file.file_name_date],
-    limit: 1,
-    preload: [topic_entries: {entries, topic: topics}])
-
+    (from f in File,
+    join: e in assoc(f, :topic_entries),
+    join: t in assoc(e, :topic),
+    where: t.user_id == ^user_id,
+    where: f.file_name_date == ^date,
+    preload: [topic_entries: {e, topic: t}])
+    |> Repo.one()
   end
 
   defp user_files_query(user_id) do
@@ -104,6 +103,22 @@ defmodule GitNotes.Notes do
     File.changeset(file, attrs)
   end
 
+  @spec change_update_file(
+          GitNotes.Notes.File.t(),
+          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
+        ) :: map
+  def change_update_file(%File{} = file, attrs \\ %{}) do
+    file
+    |> Repo.preload(:topic_entries)
+    |> File.update_changeset(attrs)
+  end
+
+  def preload_file_associations(%File{} = file) do
+    file
+    |> Repo.preload([topic_entries: :topic])
+  end
+
+
   @doc """
   Returns the list of topics.
 
@@ -128,22 +143,31 @@ defmodule GitNotes.Notes do
      select: t)
   end
 
-  def get_user_topic_by_name(user_id, name) do
+  def user_topic_by_name_query(user_id, name) do
     (from t in user_topics_query(user_id),
     where: t.name == ^name)
+  end
+
+  def get_user_topic_by_name(user_id, name) do
+    user_topic_by_name_query(user_id, name)
     |> Repo.one()
   end
 
-  # def list_last_user_topics(%GitNotes.Accounts.User{} = user) do
-  #   user_files = user_files_query(user.id)
-  #   |> exclude(:select)
-  #   (from f in user_files,
-  #   join: t in Topic, on: t.file_id == f.id,
-  #   distinct: t.name,
-  #   order_by: [desc: f.file_name_date],
-  #   select: t)
-  #   |> Repo.all()
-  # end
+  def get_latest_entry_of_topic(user_id, topic, date) do
+    query = user_topic_by_name_query(user_id, topic.name)
+    |> exclude(:select)
+    (from t in query,
+    join: e in TopicEntry, on: e.topic_id == t.id,
+    join: f in File, on: e.file_id == f.id,
+    where: f.file_name_date <= ^date,
+    order_by: [desc: f.file_name_date],
+    limit: 1,
+    select: e
+    )
+    |> Repo.one()
+  end
+
+
 
   @doc """
   Gets a single topic.

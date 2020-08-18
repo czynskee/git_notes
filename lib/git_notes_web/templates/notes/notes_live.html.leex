@@ -7,14 +7,17 @@
 <%= f = form_for @file_changeset, "#", [phx_submit: :commit_notes] %>
   <%= label f, :content %>
   <%= textarea f, :content,
-  readonly: !@editing, value: @file && decode_file(@file), id: "notes-text", phx_hook: "Topics" %>
+  readonly: !@editing, value: @file && decode_file(@file), id: "notes-text", phx_hook: "Topics", class: "notes-textarea" %>
   <%= submit (@editing && "Commit and Push") || "Edit Notes" %>
 </form>
 
+
 <%= if @search_topics do %>
+  <h2> Searching Topics </h2>
   <div>
     <%= for {search_topic, i} <- Enum.with_index(@search_topics) do %>
       <div
+      phx_hook:
       <%= i == @search_topic_index && "style=color:red;" %>
       >
         <%= search_topic.name %>
@@ -23,6 +26,7 @@
   </div>
 <% end %>
 
+<h2> Commits </h2>
 <%= for commit <- @commits do %>
   <div>
     <%= commit.sha %>
@@ -35,6 +39,7 @@
 
 <button phx-click="refresh_files"> Refresh Notes from Github </button>
 
+<h2> All Topics </h2>
 <%= for topic <- @topics do %>
   <div>
     <%= topic.name %>

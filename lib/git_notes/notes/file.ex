@@ -34,7 +34,6 @@ defmodule GitNotes.Notes.File do
   end
 
   defp find_and_add_topic_entries(changeset) do
-    IO.inspect changeset
     if changeset.changes[:content] do
       repo_id = changeset.changes[:git_repo_id] || changeset.data.git_repo_id
       file_date = changeset.changes[:file_name_date] || changeset.data.file_name_date
@@ -66,18 +65,13 @@ defmodule GitNotes.Notes.File do
 
     entry_delims = topic_delims
     |> Enum.with_index()
-    |> IO.inspect
     |> Enum.map(fn {{_first, _start, last}, index} ->
       entry_start = last + 1
       {entry_end, _, _} = Enum.at(topic_delims, index + 1) || {String.length(decoded_content), nil, nil}
       {entry_start, entry_end - 1}
     end)
 
-    # topic_delims = topic_delims
-    # |> Enum.map(fn {_, first, last} -> {first, last} end)
-
     Enum.zip(topic_delims, entry_delims)
-    |> IO.inspect
     |> Enum.map(fn {{heading_start, topic_start, topic_end}, {entry_start, entry_end}} ->
       { String.slice(decoded_content, heading_start..topic_end),
         String.slice(decoded_content, topic_start..topic_end) |> String.trim(),

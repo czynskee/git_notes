@@ -32,6 +32,19 @@ let Hooks = {
   Topics: {
     searching: false,
     searchTerm: "",
+    removeSearchTerm() {
+      let matches = [...this.el.value.matchAll(/(\/.+?)(?:((?:-|\+)\d)|$)/gm)]
+      for (let match of matches) {
+        if (this.el.selectionStart - match["index"] - match[0].length == 0) {
+          let selectionStart = this.el.selectionStart;
+          let matchLength = match[0].length
+          this.el.value = this.el.value.slice(0,match["index"]) + this.el.value.slice(match["index"] + matchLength);
+          this.el.selectionStart = selectionStart - matchLength;
+          this.el.selectionEnd = selectionStart - matchLength;
+        }
+      }
+
+    },
     mounted() {
       this.el.addEventListener("input", e => {
         let matches = [...this.el.value.matchAll(/(\/.+?)(?:((?:-|\+)\d)|$)/gm)]
@@ -49,6 +62,14 @@ let Hooks = {
           this.pushEvent("search_term", {term: ""})
         }
         })
+
+        this.el.addEventListener("keydown", e => {
+          if (e.key === "Escape") {
+            this.removeSearchTerm()
+            this.searching = false;
+            this.pushEvent("search_term", {term: ""})
+          }
+        })
       
         this.el.addEventListener("keydown", e => {
         if (this.searching) {
@@ -59,6 +80,8 @@ let Hooks = {
             e.preventDefault()
             this.pushEvent("select_topic", {direction: "down"})
           } else if (e.key == "Enter") {
+            this.removeSearchTerm()
+
             e.preventDefault()
             this.searching = false
             this.pushEvent("insert_topic", {content: this.el.value, location: this.el.selectionStart})

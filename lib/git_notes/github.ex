@@ -162,13 +162,9 @@ defmodule GitNotes.Github do
     added_files ++ modified_files
     |> retrieve_and_prepare_files(token, user, repo)
     |> Enum.each(fn file ->
-      case Notes.get_file_by(repo.id, %{name: file["name"]}) do
-        nil ->
-          Map.put(file, "git_repo_id", repo.id)
-          |> Notes.create_file()
-        existing ->
-          Notes.update_file(existing, file)
-      end
+      file
+      |> Map.put("git_repo_id", repo.id)
+      |> Notes.create_or_update_file()
     end)
 
     removed_files

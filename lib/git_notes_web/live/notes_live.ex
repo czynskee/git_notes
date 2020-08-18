@@ -70,9 +70,20 @@ defmodule GitNotesWeb.NotesLive do
       search_topics = socket.assigns.topics
       |> Enum.filter(& String.starts_with?(&1.name |> String.downcase(), term))
 
+      search_topic_index = socket.assigns.search_topic_index
+
+      search_topic_index =
+      if search_topic_index > length(search_topics) - 1 do
+        length(search_topics) - 1
+      else search_topic_index
+      end
+
       socket
       |> assign(:search_topics, search_topics)
       |> assign(:search_term, term)
+      |> assign(:search_topic_index, search_topic_index)
+
+
     end
 
     {:noreply, socket}
@@ -101,22 +112,38 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def handle_event("insert_topic", %{"location" => location, "content" => content}, socket) do
-    %{search_topic_index: index, search_topics: topics, search_term: term} = socket.assigns
+    %{user: user, file: file, date: date, search_topic_index: index, search_topics: topics, search_term: term} = socket.assigns
 
     topic = Enum.at(topics, index)
-    topic_content = Notes.get_topic_content(topic)
 
-    term_length = String.length(term) + 1
+    topic_entry_content = Notes.get_latest_entry_of_topic(user.id, topic, date)
+    |> Map.get(:content)
+    |> Base.decode64!()
 
-    content = String.slice(content, 0, location - term_length) <> "\n#{topic_content}" <> String.slice(content, location, String.length(content))
+    first = String.slice(content, 1..location)
+    middle = topic.heading <> topic_entry_content
+    last = String.slice(content, location, String.length(content))
+
+    content = first <> middle <> last
+
+    # Re parse file with topic entry inserted. assign that new file to socket (though don't save it to db)
+
+    file = case file do
+      nil ->
+        Notes.change_file(%Notes.File{},
+        %{name: Date.to_string(date) <> ".md", git_repo_id: user.notes_repo_id, content: content |> Base.encode64()})
+      file -> Notes.change_update_file(file, %{content: content |> Base.encode64()})
+    end
+    |> Ecto.Changeset.apply_changes()
+    |> Notes.preload_file_associations()
+
+
 
     socket = socket
-    |> assign(:file, Map.put(socket.assigns.file, :content, Base.encode64(content)))
     |> clear_search_topics()
+    |> assign(:file, file)
     {:noreply, socket}
   end
-
-
 
   defp clear_search_topics(socket) do
 
@@ -124,7 +151,6 @@ defmodule GitNotesWeb.NotesLive do
     |> assign(:search_topics, [])
     |> assign(:search_topic_index, 0)
   end
-
 
   defp get_days_info(socket, date) do
     user_id = socket.assigns.user_id
