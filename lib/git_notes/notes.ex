@@ -118,6 +118,11 @@ defmodule GitNotes.Notes do
     |> Repo.preload([topic_entries: :topic])
   end
 
+  def preload_topic_entries(%Topic{} = topic) do
+    topic
+    |> Repo.preload([topic_entries: :file])
+  end
+
 
   @doc """
   Returns the list of topics.

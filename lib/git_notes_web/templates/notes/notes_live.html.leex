@@ -16,11 +16,26 @@
   <h2> Searching Topics </h2>
   <div>
     <%= for {search_topic, i} <- Enum.with_index(@search_topics) do %>
-      <div
-      phx_hook:
-      <%= i == @search_topic_index && "style=color:red;" %>
-      >
+      <div>
+        <span
+          <%= i == @search_topic_index && "style=color:red;" %>>
         <%= search_topic.name %>
+        </span>
+        <%= if i == @search_topic_index do %>
+          <div style="display: flex">
+            <%= for {topic_entry, i} <- search_topic.topic_entries |> Enum.reverse |> Enum.with_index do %>
+              <div
+                <%= i == @search_topic_entry_index && "style=color:red;" %>>
+                <%= topic_entry.file.file_name_date %>
+                <%= if i == @search_topic_entry_index do %>
+                  <div>
+                    <%= topic_entry.content |> Base.decode64! %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   </div>

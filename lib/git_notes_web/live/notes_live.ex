@@ -63,12 +63,14 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def handle_event("search_term", %{"term" => term}, socket) do
-    socket = if term === "" do
+    socket =
+    if term === "" do
       socket
       |> clear_search_topics()
     else
       search_topics = socket.assigns.topics
       |> Enum.filter(& String.starts_with?(&1.name |> String.downcase(), term))
+      |> Enum.map(& Notes.preload_topic_entries(&1))
 
       search_topic_index = socket.assigns.search_topic_index
 
@@ -82,8 +84,6 @@ defmodule GitNotesWeb.NotesLive do
       |> assign(:search_topics, search_topics)
       |> assign(:search_term, term)
       |> assign(:search_topic_index, search_topic_index)
-
-
     end
 
     {:noreply, socket}
@@ -97,6 +97,7 @@ defmodule GitNotesWeb.NotesLive do
     index = (index < num_topics && index) || num_topics - 1
     socket = socket
     |> assign(:search_topic_index, index)
+    |> assign(:search_topic_entry_index, 0)
 
     {:noreply, socket}
   end
@@ -107,16 +108,47 @@ defmodule GitNotesWeb.NotesLive do
     index = (index >= 0 && index) || 0
     socket = socket
     |> assign(:search_topic_index, index)
+    |> assign(:search_topic_entry_index, 0)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("select_topic", %{"direction" => "left"}, socket) do
+    %{search_topic_entry_index: index} = socket.assigns
+    index = index - 1
+    index = (index >= 0 && index) || 0
+    socket = socket
+    |> assign(:search_topic_entry_index, index)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("select_topic", %{"direction" => "right"}, socket) do
+    %{search_topic_entry_index: index, search_topics: topics, search_topic_index: topic_index} = socket.assigns
+
+    topic = Enum.at(topics, topic_index)
+
+    index = index + 1
+    num_entries = length(topic.topic_entries)
+
+    index = (index < num_entries && index) || num_entries - 1
+    socket = socket
+    |> assign(:search_topic_entry_index, index)
 
     {:noreply, socket}
   end
 
   def handle_event("insert_topic", %{"location" => location, "content" => content}, socket) do
-    %{user: user, file: file, date: date, search_topic_index: index, search_topics: topics, search_term: term} = socket.assigns
+    %{user: user, file: file, date: date, search_topic_index: index, search_topics: topics, search_topic_entry_index: topic_entry_index} = socket.assigns
 
     topic = Enum.at(topics, index)
 
-    topic_entry_content = Notes.get_latest_entry_of_topic(user.id, topic, date)
+    topic_entry_content =
+    Notes.preload_topic_entries(topic)
+    |> Map.get(:topic_entries)
+    |> Enum.reverse()
+    |> Enum.at(topic_entry_index)
+    # topic_entry_content = Notes.get_latest_entry_of_topic(user.id, topic, date)
     |> Map.get(:content)
     |> Base.decode64!()
 
@@ -126,8 +158,6 @@ defmodule GitNotesWeb.NotesLive do
 
     content = first <> middle <> last
 
-    # Re parse file with topic entry inserted. assign that new file to socket (though don't save it to db)
-
     file = case file do
       nil ->
         Notes.change_file(%Notes.File{},
@@ -136,8 +166,6 @@ defmodule GitNotesWeb.NotesLive do
     end
     |> Ecto.Changeset.apply_changes()
     |> Notes.preload_file_associations()
-
-
 
     socket = socket
     |> clear_search_topics()
@@ -150,6 +178,7 @@ defmodule GitNotesWeb.NotesLive do
     socket
     |> assign(:search_topics, [])
     |> assign(:search_topic_index, 0)
+    |> assign(:search_topic_entry_index, 0)
   end
 
   defp get_days_info(socket, date) do

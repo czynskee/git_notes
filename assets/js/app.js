@@ -62,14 +62,6 @@ let Hooks = {
           this.pushEvent("search_term", {term: ""})
         }
         })
-
-        this.el.addEventListener("keydown", e => {
-          if (e.key === "Escape") {
-            this.removeSearchTerm()
-            this.searching = false;
-            this.pushEvent("search_term", {term: ""})
-          }
-        })
       
         this.el.addEventListener("keydown", e => {
         if (this.searching) {
@@ -81,10 +73,19 @@ let Hooks = {
             this.pushEvent("select_topic", {direction: "down"})
           } else if (e.key == "Enter") {
             this.removeSearchTerm()
-
             e.preventDefault()
             this.searching = false
             this.pushEvent("insert_topic", {content: this.el.value, location: this.el.selectionStart})
+          } else if (e.key == "Escape") {
+            this.removeSearchTerm()
+            this.searching = false;
+            this.pushEvent("search_term", {term: ""})
+          } else if (e.key == "ArrowLeft") {
+            e.preventDefault()
+            this.pushEvent("select_topic", {direction: "left"})
+          } else if (e.key == "ArrowRight") {
+            e.preventDefault()
+            this.pushEvent("select_topic", {direction: "right"})
           }
         }
       })
