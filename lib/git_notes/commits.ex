@@ -47,7 +47,9 @@ defmodule GitNotes.Commits do
   def create_commit(attrs) do
     %Commit{}
     |> Commit.changeset(attrs)
+    |> IO.inspect
     |> Repo.insert()
+    |> IO.inspect
   end
 
   def get_commit(id) do
