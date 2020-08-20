@@ -75,7 +75,7 @@ defmodule GitNotesWeb.WebhookController do
   def webhook(conn, %{"commits" => commits, "ref" => ref, "repository" => %{"id" => repo_id}} = payload) do
     commits
     |> Enum.map(&(Map.put(&1, "git_repo_id", repo_id)))
-    |> Enum.map(&(Map.put(&1, "author", get_in(&1, ["author", "username"]))))
+    |> Enum.map(&(Map.put(&1, "author", get_in(&1, ["author", "name"]))))
     |> Enum.map(&(Map.put(&1, "commit_date",
       &1["timestamp"]
       |> String.split("T") |> Enum.at(0) |> Date.from_iso8601() |> elem(1))))

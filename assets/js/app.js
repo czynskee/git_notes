@@ -13,6 +13,7 @@ import "../css/app.scss"
     // import socket from "./socket"
 //
 import "phoenix_html"
+import "lodash";
 
 
 // autocomplete
@@ -29,6 +30,69 @@ import "phoenix_html"
 // for.
 
 let Hooks = {
+  // Scrolling: {
+  //   mounted() {
+  //     window.addEventListener("scroll", e => {
+  //       let page = document.documentElement
+  //       let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
+
+  //       if (percentage < 0.1) {
+  //         this.pushEvent("change_range", {amount: -1})
+  //       }
+  //       else if (percentage > 0.9) this.pushEvent("change_range", {amount: 1})
+  //     })
+  //   }
+  // },
+  Today: {
+    mounted() {
+      this.el.scrollIntoView()
+    }
+  },
+  Days: {
+    loading: false,
+    scrollTop: document.documentElement.scrollTop,
+    height: document.documentElement.offsetHeight,
+    beforeUpdate() {
+      this.scrollTop = document.documentElement.scrollTop;
+      this.height = document.documentElement.offsetHeight;
+    },
+    mounted() {
+      // this.handleEvent("new_day", ({action}) => {
+      //   if (action == "prepend") {
+      //     this.el.lastElementChild.remove()
+      //     let addedElHeight = this.el.firstElementChild.offsetHeight
+      //     document.documentElement.scrollTop = this.scrollTop + addedElHeight;
+      //   } else this.el.firstElementChild.remove()
+      // })
+      // this.handleEvent("change_range", () => {
+      //   this.loading = false;
+      // })
+      window.addEventListener("scroll", _.throttle(e => {
+        if (this.loading) return;
+        let page = document.documentElement
+        let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
+        if (percentage < 0.3) {
+          this.loading = true;
+          this.pushEvent("change_range", {amount: -1}, () => {
+            this.loading = false;
+            this.el.lastElementChild.remove()
+            let addedElHeight = this.el.firstElementChild.offsetHeight
+            document.documentElement.scrollTop = this.scrollTop + addedElHeight;
+          })
+        }
+        else if (percentage > 0.7) {
+          this.loading = true;
+          this.pushEvent("change_range", {amount: 1}, () => {
+            this.loading = false;
+            this.el.firstElementChild.remove()
+            let addedElHeight = this.el.lastElementChild.offsetHeight
+            document.documentElement.scrollTop = this.scrollTop - addedElHeight;
+          });
+        }
+      }), 1000, {leading: true})
+    },
+
+  },
   Topics: {
     searching: false,
     searchTerm: "",
@@ -104,7 +168,7 @@ import LiveSocket from "phoenix_live_view"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
 })
 
 liveSocket.connect()

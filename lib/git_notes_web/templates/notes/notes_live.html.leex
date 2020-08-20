@@ -1,19 +1,18 @@
-<button phx-click="previous_day"> Previous </button>
-<button phx-click="next_day"> Next </button>
+<button phx-click="change_range" phx-value-amount=-1> Previous </button>
+<button phx-click="change_range" phx-value-amount=1> Next </button>
+<button phx-click="refresh_files"> Refresh Notes from Github </button>
 
-<div>
-  <%= @date %>
+
+<div class="notes-header" id="header">
+  <div>
+    <%= @user.login %>
+  </div>
 </div>
-<%= f = form_for @file_changeset, "#", [phx_submit: :commit_notes] %>
-  <%= label f, :content %>
-  <%= textarea f, :content,
-  readonly: !@editing, value: @file && decode_file(@file), id: "notes-text", phx_hook: "Topics", class: "notes-textarea" %>
-  <%= submit (@editing && "Commit and Push") || "Edit Notes" %>
-</form>
 
+<%= render GitNotesWeb.NotesView, "notes_main_live.html", assigns %>
 
-<%= if @search_topics do %>
-  <h2> Searching Topics </h2>
+<%= if length(@search_topics) > 0 do %>
+  <h4> Searching Topics... </h4>
   <div>
     <%= for {search_topic, i} <- Enum.with_index(@search_topics) do %>
       <div>
@@ -41,22 +40,6 @@
   </div>
 <% end %>
 
-<h2> Commits </h2>
-<%= for commit <- @commits do %>
-  <div>
-    <%= commit.sha %>
-    <%= commit.author %>
-    <%= commit.commit_date %>
-    <%= commit.message %>
-  </div>
-
-<% end %>
-
+<button phx-click="change_range" phx-value-amount=-1> Previous </button>
+<button phx-click="change_range" phx-value-amount=1> Next </button>
 <button phx-click="refresh_files"> Refresh Notes from Github </button>
-
-<h2> All Topics </h2>
-<%= for topic <- @topics do %>
-  <div>
-    <%= topic.name %>
-  </div>
-<% end %>

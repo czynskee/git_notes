@@ -30,6 +30,42 @@
   display: none;
 }
 
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 2em;
+}
+
+.notes-main {
+  & .notes-main-header {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+  }
+
+  & textarea {
+    resize: none;
+  }
+
+  & .commit-button {
+    display: block;
+    margin-left: auto;
+  }
+
+  & .notes-text-commits-container {
+    display: flex;
+  }
+}
+
+.notes-text-container {
+  width: 70%;
+}
+
+.commits-container {
+  width: 30%;
+  text-align: center;
+}
+
 .topic-entry {
   white-space: pre-wrap;
   border: none;

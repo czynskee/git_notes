@@ -1,0 +1,39 @@
+<div class="notes-main"
+  id=<%= @date %>
+  <%= if @date == Date.utc_today(), do: "phx-hook=Today" %>
+  >
+
+  <div class="notes-main-header">
+    <div>
+      <%= @date %>
+    </div>
+    <div>
+      <%= display_date(@date) %>
+    </div>
+  </div>
+
+  <div class="notes-text-commits-container">
+    <div class="notes-text-container">
+      <%= f = form_for @file_changeset, "#", [phx_submit: :commit_notes] %>
+        <%= textarea f, :content,
+        readonly: !@editing, value: @file && decode_file(@file), id: "textarea-#{@date}", phx_hook: "Topics", class: "notes-textarea" %>
+        <%= submit (@editing && "Commit and Push") || "Edit Notes", class: "commit-button" %>
+      </form>
+    </div>
+
+    <div class="commits-container">
+      <h2> Commits </h2>
+
+      <%= for commit <- @commits do %>
+        <div>
+          <%= commit.sha %>
+          <%= commit.author %>
+          <%= commit.commit_date %>
+          <%= commit.message %>
+        </div>
+
+      <% end %>
+    </div>
+
+  </div>
+</div>

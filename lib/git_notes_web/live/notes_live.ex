@@ -1,7 +1,7 @@
 defmodule GitNotesWeb.NotesLive do
   use Phoenix.LiveView
   use Phoenix.HTML
-  alias GitNotes.{Accounts, Notes, Commits, Github}
+  alias GitNotes.{Accounts, Notes, Github}
 
   def render(assigns) do
     GitNotesWeb.NotesView.render("notes_live.html", assigns)
@@ -10,25 +10,32 @@ defmodule GitNotesWeb.NotesLive do
   def mount(_params, session, socket) do
     GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
 
+    date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
+
     socket = socket
-    |> assign(:user_id, session["user_id"])
-    |> assign(:file_changeset, Notes.change_file(%Notes.File{}))
+    |> assign(:user, Accounts.get_user(session["user_id"]))
+    |> assign(:date_range, date_range)
+    |> assign(:first_date, date_range.first)
+    |> assign(:last_date, date_range.last)
+    |> assign(:new_day_action, "prepend")
+    |> get_topic_info()
     |> clear_search_topics()
 
-    {:ok, get_days_info(socket, Date.utc_today())}
+    {:ok, socket, temporary_assigns: [date_range: []]}
   end
 
-  def handle_info(%{event: "new_commits"}, socket) do
-    {:noreply, get_commit_info(socket)}
-  end
 
-  def handle_info(%{event: "updated_file"}, socket) do
+  # def handle_info(%{event: "new_commits"}, socket) do
+  #   {:noreply, get_commit_info(socket)}
+  # end
 
-    socket = socket
-    |> get_file_info()
-    |> get_topic_info()
-    {:noreply, socket}
-  end
+  # def handle_info(%{event: "updated_file"}, socket) do
+
+  #   socket = socket
+  #   |> get_file_info()
+  #   |> get_topic_info()
+  #   {:noreply, socket}
+  # end
 
   def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
     socket = socket
@@ -45,16 +52,40 @@ defmodule GitNotesWeb.NotesLive do
     {:noreply, socket}
   end
 
-  def handle_event("previous_day", _value, socket) do
-    previous_date = Date.add(socket.assigns.date, -1)
+  def handle_event("change_range", value, socket) do
+    change_amount = if is_integer(value["amount"]) do
+      value["amount"]
+    else Integer.parse(value["amount"]) |> elem(0)
+    end
 
-    {:noreply, get_days_info(socket, previous_date)}
-  end
+    {date_range, action} = if change_amount == -1 do
+      {Date.range(Date.add(socket.assigns.first_date, -1), Date.add(socket.assigns.last_date, -1)),
+      "prepend"}
+    else
+      {Date.range(Date.add(socket.assigns.first_date, 1), Date.add(socket.assigns.last_date, 1)),
+      "append"}
+    end
+    |> IO.inspect
 
-  def handle_event("next_day", _value, socket) do
-    next_date = Date.add(socket.assigns.date, 1)
 
-    {:noreply, get_days_info(socket, next_date)}
+
+    # date_range = socket.assigns.date_range
+    # |> Enum.map(& Date.add(&1, change_amount))
+
+    # date_range =
+    # if value["amount"] == -1 do
+    #   Date.range(Date.add(date_range.first, -1),date_range.last)
+    # else
+    #   Date.range(date_range.first, Date.add(date_range.last, 1))
+    # end
+
+    socket = socket
+    |> assign(:date_range, date_range)
+    |> assign(:new_day_action, action)
+    |> assign(:first_date, date_range.first)
+    |> assign(:last_date, date_range.last)
+
+    {:reply, %{}, socket}
   end
 
   def handle_event("refresh_files", _value, socket) do
@@ -69,7 +100,13 @@ defmodule GitNotesWeb.NotesLive do
       |> clear_search_topics()
     else
       search_topics = socket.assigns.topics
-      |> Enum.filter(& String.starts_with?(&1.name |> String.downcase(), term))
+      |> Enum.filter(&String.contains?(&1.name |> String.downcase(), term))
+      |> Enum.sort_by(&Map.get(&1, :name) |> String.downcase(), fn name1, name2 ->
+        if String.starts_with?(name1, term) && !String.starts_with?(name2, term) do
+          true
+        else false
+        end
+      end)
       |> Enum.map(& Notes.preload_topic_entries(&1))
 
       search_topic_index = socket.assigns.search_topic_index
@@ -148,7 +185,6 @@ defmodule GitNotesWeb.NotesLive do
     |> Map.get(:topic_entries)
     |> Enum.reverse()
     |> Enum.at(topic_entry_index)
-    # topic_entry_content = Notes.get_latest_entry_of_topic(user.id, topic, date)
     |> Map.get(:content)
     |> Base.decode64!()
 
@@ -181,31 +217,7 @@ defmodule GitNotesWeb.NotesLive do
     |> assign(:search_topic_entry_index, 0)
   end
 
-  defp get_days_info(socket, date) do
-    user_id = socket.assigns.user_id
 
-    socket
-    |> assign(:date, date)
-    |> assign(:editing, true)
-    |> assign(:user, Accounts.get_user(user_id))
-    |> get_file_info()
-    |> get_commit_info()
-    |> get_topic_info()
-  end
-
-  defp get_commit_info(socket) do
-    days_commits = Commits.get_commits_by_date(socket.assigns.user.id, socket.assigns.date)
-
-    socket
-    |> assign(:commits, days_commits)
-  end
-
-  defp get_file_info(socket) do
-    current_file = Notes.get_file_by_date(socket.assigns.user.id, socket.assigns.date)
-
-    socket
-    |> assign(:file, current_file)
-  end
 
   defp get_topic_info(socket) do
     topics = Notes.list_user_topics(socket.assigns.user.id)
