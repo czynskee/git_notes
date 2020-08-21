@@ -65,19 +65,6 @@ defmodule GitNotesWeb.NotesLive do
       {Date.range(Date.add(socket.assigns.first_date, 1), Date.add(socket.assigns.last_date, 1)),
       "append"}
     end
-    |> IO.inspect
-
-
-
-    # date_range = socket.assigns.date_range
-    # |> Enum.map(& Date.add(&1, change_amount))
-
-    # date_range =
-    # if value["amount"] == -1 do
-    #   Date.range(Date.add(date_range.first, -1),date_range.last)
-    # else
-    #   Date.range(date_range.first, Date.add(date_range.last, 1))
-    # end
 
     socket = socket
     |> assign(:date_range, date_range)

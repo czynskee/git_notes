@@ -57,16 +57,6 @@ let Hooks = {
       this.height = document.documentElement.offsetHeight;
     },
     mounted() {
-      // this.handleEvent("new_day", ({action}) => {
-      //   if (action == "prepend") {
-      //     this.el.lastElementChild.remove()
-      //     let addedElHeight = this.el.firstElementChild.offsetHeight
-      //     document.documentElement.scrollTop = this.scrollTop + addedElHeight;
-      //   } else this.el.firstElementChild.remove()
-      // })
-      // this.handleEvent("change_range", () => {
-      //   this.loading = false;
-      // })
       window.addEventListener("scroll", _.throttle(e => {
         if (this.loading) return;
         let page = document.documentElement
