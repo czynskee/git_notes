@@ -34,20 +34,20 @@ defmodule GitNotesWeb.NotesLive do
   #   {:noreply, socket}
   # end
 
-  def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
-    socket = socket
-    |> assign(:editing, true)
+  # def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
+  #   socket = socket
+  #   |> assign(:editing, true)
 
-    {:noreply, socket}
-  end
+  #   {:noreply, socket}
+  # end
 
-  def handle_event("commit_notes", %{"file" => %{"content" => content}}, socket) do
-    Github.commit_and_push_file(socket.assigns, content)
-    socket = socket
-    |> assign(:editing, false)
+  # def handle_event("commit_notes", %{"file" => %{"content" => content}}, socket) do
+  #   Github.commit_and_push_file(socket.assigns, content)
+  #   socket = socket
+  #   |> assign(:editing, false)
 
-    {:noreply, socket}
-  end
+  #   {:noreply, socket}
+  # end
 
   def handle_event("change_range", value, socket) do
     amount = if is_integer(value["amount"]), do: value["amount"], else: Integer.parse(value["amount"]) |> elem(0)

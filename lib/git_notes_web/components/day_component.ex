@@ -1,7 +1,7 @@
 defmodule GitNotesWeb.DayComponent do
   use GitNotesWeb, :live_component
 
-  alias GitNotes.{Notes, Commits}
+  alias GitNotes.{Notes, Commits, Github}
 
 
   def mount(socket) do
@@ -12,9 +12,20 @@ defmodule GitNotesWeb.DayComponent do
     socket = socket
     |> Map.put(:assigns, Map.merge(socket.assigns, assigns))
     |> assign(:file_changeset, Notes.change_file(%Notes.File{}))
-    |> assign(:today, assigns.date == Date.utc_today())
     |> get_days_info()
     {:ok, socket}
+  end
+
+  def handle_event("edit_commit", _value, %{assigns: %{editing: false}} = socket) do
+    {:noreply, assign(socket, :editing, true)}
+  end
+
+  def handle_event("edit_commit", %{"file" => %{"content" => content}}, socket) do
+    Github.commit_and_push_file(socket.assigns, content)
+    socket = socket
+    |> assign(:editing, false)
+
+    {:noreply, socket}
   end
 
   defp get_days_info(socket) do

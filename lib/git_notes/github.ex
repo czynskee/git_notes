@@ -60,7 +60,7 @@ defmodule GitNotes.Github do
   end
 
   def commit_and_push_file(payload, content) do
-    user = Accounts.get_user(payload[:user_id])
+    user = payload.user
     notes_repo = GitRepos.get_repo(user.notes_repo_id)
     token = retrieve_user_token(user)
 

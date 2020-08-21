@@ -47,9 +47,13 @@
     resize: none;
   }
 
-  & .commit-button {
+  & .commit-button, .edit-button {
     display: block;
     margin-left: auto;
+  }
+
+  & .commit-button {
+    background-color: orange;
   }
 
   & .notes-text-commits-container {
