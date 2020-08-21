@@ -15,13 +15,10 @@ defmodule GitNotesWeb.NotesLive do
     socket = socket
     |> assign(:user, Accounts.get_user(session["user_id"]))
     |> assign(:date_range, date_range)
-    |> assign(:first_date, date_range.first)
-    |> assign(:last_date, date_range.last)
-    |> assign(:new_day_action, "prepend")
     |> get_topic_info()
     |> clear_search_topics()
 
-    {:ok, socket, temporary_assigns: [date_range: []]}
+    {:ok, socket}
   end
 
 
@@ -53,24 +50,13 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def handle_event("change_range", value, socket) do
-    change_amount = if is_integer(value["amount"]) do
-      value["amount"]
-    else Integer.parse(value["amount"]) |> elem(0)
-    end
+    amount = if is_integer(value["amount"]), do: value["amount"], else: Integer.parse(value["amount"]) |> elem(0)
 
-    {date_range, action} = if change_amount == -1 do
-      {Date.range(Date.add(socket.assigns.first_date, -1), Date.add(socket.assigns.last_date, -1)),
-      "prepend"}
-    else
-      {Date.range(Date.add(socket.assigns.first_date, 1), Date.add(socket.assigns.last_date, 1)),
-      "append"}
-    end
+    date_range = socket.assigns.date_range
+    |> Enum.map(& Date.add(&1, amount))
 
     socket = socket
     |> assign(:date_range, date_range)
-    |> assign(:new_day_action, action)
-    |> assign(:first_date, date_range.first)
-    |> assign(:last_date, date_range.last)
 
     {:reply, %{}, socket}
   end

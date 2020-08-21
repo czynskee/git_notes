@@ -65,7 +65,6 @@ let Hooks = {
           this.loading = true;
           this.pushEvent("change_range", {amount: -1}, () => {
             this.loading = false;
-            this.el.lastElementChild.remove()
             let addedElHeight = this.el.firstElementChild.offsetHeight
             document.documentElement.scrollTop = this.scrollTop + addedElHeight;
           })
@@ -74,7 +73,6 @@ let Hooks = {
           this.loading = true;
           this.pushEvent("change_range", {amount: 1}, () => {
             this.loading = false;
-            this.el.firstElementChild.remove()
             let addedElHeight = this.el.lastElementChild.offsetHeight
             document.documentElement.scrollTop = this.scrollTop - addedElHeight;
           });
