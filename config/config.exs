@@ -16,7 +16,7 @@ config :git_notes,
   github_api_url: "https://api.github.com",
   github_api_version: "application/vnd.github.v3+json",
   github_app_id: 73363,
-  app_name: "Gitgeneering Day Book",
+  app_name: "GDB",
   http_adapter: HTTPoison,
   github_api: GitNotes.GithubAPI.HTTP,
   public_app_name: "gitautonotes"

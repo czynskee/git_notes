@@ -1,9 +1,9 @@
 <button phx-click="change_range" phx-value-amount=-1> Previous </button>
 <button phx-click="change_range" phx-value-amount=1> Next </button>
-<button phx-click="refresh_files"> Refresh Notes from Github </button>
 
 
-<div class="notes-header" id="header">
+<div class="header" id="header">
+  <button phx-click="refresh_files"> Refresh Notes from Github </button>
   <div>
     <%= @user.login %>
   </div>

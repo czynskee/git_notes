@@ -30,7 +30,16 @@
   display: none;
 }
 
-.notes-header {
+body, html {
+  padding: 0;
+  margin: 0;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  background: gray;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   font-size: 2em;
@@ -68,6 +77,8 @@
 .commits-container {
   width: 30%;
   text-align: center;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .topic-entry {

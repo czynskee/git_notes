@@ -1,7 +1,7 @@
 defmodule GitNotesWeb.DayComponent do
   use GitNotesWeb, :live_component
 
-  alias GitNotes.{Notes, Commits, Github}
+  alias GitNotes.{Notes, Github}
 
 
   def mount(socket) do
@@ -12,9 +12,27 @@ defmodule GitNotesWeb.DayComponent do
     socket = socket
     |> Map.put(:assigns, Map.merge(socket.assigns, assigns))
     |> assign(:file_changeset, Notes.change_file(%Notes.File{}))
-    |> get_days_info()
+    |> assign(:editing, false)
     {:ok, socket}
   end
+
+  def preload(list_of_assigns) do
+    lower = List.first(list_of_assigns).id
+    upper = List.last(list_of_assigns).id
+    user_id = List.first(list_of_assigns).user_id
+    {commits, files} = Notes.get_file_and_commit_date_range(user_id, lower, upper)
+
+    list_of_assigns
+    |> Enum.map(fn %{id: date} = assigns ->
+      commits = Enum.filter(commits, & &1.commit_date == date)
+      file = Enum.filter(files, & &1.file_name_date == date) |> Enum.at(0)
+
+      assigns
+      |> Map.put(:commits, commits)
+      |> Map.put(:file, file)
+    end)
+  end
+
 
   def handle_event("edit_commit", _value, %{assigns: %{editing: false}} = socket) do
     {:noreply, assign(socket, :editing, true)}
@@ -26,27 +44,6 @@ defmodule GitNotesWeb.DayComponent do
     |> assign(:editing, false)
 
     {:noreply, socket}
-  end
-
-  defp get_days_info(socket) do
-    socket
-    |> assign(:editing, false)
-    |> get_file_info()
-    |> get_commit_info()
-  end
-
-  defp get_file_info(socket) do
-    current_file = Notes.get_file_by_date(socket.assigns.user.id, socket.assigns.date)
-
-    socket
-    |> assign(:file, current_file)
-  end
-
-  defp get_commit_info(socket) do
-    days_commits = Commits.get_commits_by_date(socket.assigns.user.id, socket.assigns.date)
-
-    socket
-    |> assign(:commits, days_commits)
   end
 
   def decode_file(file) do

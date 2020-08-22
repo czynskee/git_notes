@@ -8,7 +8,7 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def mount(_params, session, socket) do
-    GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
+
 
     date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
 
@@ -51,6 +51,7 @@ defmodule GitNotesWeb.NotesLive do
 
   def handle_event("change_range", value, socket) do
     amount = if is_integer(value["amount"]), do: value["amount"], else: Integer.parse(value["amount"]) |> elem(0)
+    |> IO.inspect
 
     date_range = socket.assigns.date_range
     |> Enum.map(& Date.add(&1, amount))

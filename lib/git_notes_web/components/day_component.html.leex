@@ -1,14 +1,14 @@
 <div class="notes-main"
-  id=<%= @date %>
-  <%= if @date == Date.utc_today(), do: "phx-hook=Today" %>
+  id=<%= @id %>
+  <%= if @id == Date.utc_today(), do: "phx-hook=Today" %>
   >
 
   <div class="notes-main-header">
     <div>
-      <%= @date %>
+      <%= @id %>
     </div>
     <div>
-      <%= display_date(@date) %>
+      <%= display_date(@id) %>
     </div>
   </div>
 
@@ -16,7 +16,7 @@
     <div class="notes-text-container">
       <%= f = form_for @file_changeset, "#", [phx_submit: :edit_commit, phx_target: @myself] %>
         <%= textarea f, :content,
-        readonly: !@editing, value: @file && decode_file(@file), id: "textarea-#{@date}", phx_hook: "Topics", class: "notes-textarea" %>
+        readonly: !@editing, value: @file && decode_file(@file), id: "textarea-#{@id}", phx_hook: "Topics", class: "notes-textarea" %>
         <%= submit (@editing && "Commit and Push") || "Edit Notes", class: (@editing && "commit-button") || "edit-button" %>
       </form>
     </div>

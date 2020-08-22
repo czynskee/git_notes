@@ -1,8 +1,7 @@
 <div id="days-container" phx-hook="Days">
 <%= for date <- @date_range do %>
   <%= live_component @socket, GitNotesWeb.DayComponent, id: date,
-    date: date,
-    user: @user
+    user_id: @user.id
   %>
 
 <% end %>

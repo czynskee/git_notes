@@ -12,28 +12,66 @@ defmodule GitNotes.Notes do
     |> Repo.insert!()
   end
 
-  def create_or_update_file(attrs) do
+  def update_file(%File{} = file, attrs) do
+    file
+    |> Repo.preload(:topic_entries)
+    |> File.update_changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def create_or_update_file(attrs, user_id) do
+    entries = find_topic_entries(attrs["content"])
+    entries = if length(entries) == 0 do
+      default_entry(attrs["content"])
+    else entries
+    end
+    |> create_topics_from_entries(user_id)
+
+    attrs = Map.put(attrs, "topic_entries", entries)
+
     case get_file_by(attrs["git_repo_id"], %{name: attrs["name"]}) do
-      nil ->
-        create_file(attrs)
-      file ->
-        update_file(file, attrs)
+      nil -> create_file(attrs)
+      file -> update_file(file, attrs)
     end
   end
 
-  @spec create_topics_from_entries(topic_entries :: any, user_id :: integer, file_date :: Date) :: any
-  def create_topics_from_entries(topic_entries, user_id, file_date) do
+  def default_entry(content) do
+    ("# Today\n" <> Base.decode64!(content, ignore: :whitespace) ) |> Base.encode64 |> find_topic_entries
+  end
+
+  def create_topics_from_entries(topic_entries, user_id) do
     topic_entries
-    |> Enum.map(fn {heading, name, entry} ->
-      name = name || "notes from " <> (file_date |> Date.to_string())
-      heading = heading || "# " <> name
+    |> Enum.map(fn {heading, name, {location, content}} ->
       topic = case get_user_topic_by_name(user_id, name) do
-        nil -> create_topic(%{heading: heading, name: name, user_id: user_id}) |> elem(1)
+        nil ->
+          create_topic(%{heading: heading, name: name, user_id: user_id}) |> elem(1)
         topic -> topic
       end
-      {topic, entry}
+      %{file_location: location, content: content |> Base.encode64(), topic_id: topic.id}
     end)
   end
+
+  def find_topic_entries(file_content) do
+    decoded_content = Base.decode64!(file_content, ignore: :whitespace)
+    topic_delims = Regex.scan(~r/#+ (.+?)(?=\n|$)/m, decoded_content, return: :index)
+    |> Enum.map(fn [{pattern_start, _pattern_length}, {capture_start, length}] -> {pattern_start, capture_start, capture_start + length} end)
+
+    entry_delims = topic_delims
+    |> Enum.with_index()
+    |> Enum.map(fn {{_first, _start, last}, index} ->
+      entry_start = last + 1
+      {entry_end, _, _} = Enum.at(topic_delims, index + 1) || {String.length(decoded_content), nil, nil}
+      {entry_start, entry_end - 1}
+    end)
+
+    Enum.zip(topic_delims, entry_delims)
+    |> Enum.map(fn {{heading_start, topic_start, topic_end}, {entry_start, entry_end}} ->
+      { String.slice(decoded_content, heading_start..topic_end),
+        String.slice(decoded_content, topic_start..topic_end) |> String.trim(),
+      {entry_start, String.slice(decoded_content, entry_start..entry_end)}}
+    end)
+  end
+
 
   def list_user_files(%Accounts.User{id: id}) do
     list_user_files(id)
@@ -46,6 +84,29 @@ defmodule GitNotes.Notes do
   def list_repo_files(repo_id) when is_integer(repo_id) do
     Repo.all repo_files_query(repo_id)
   end
+
+  def get_file_and_commit_date_range(user_id, lower, upper) do
+    commits = (from c in GitNotes.Commits.Commit,
+    join: r in assoc(c, :git_repo),
+    join: u in assoc(r, :user), on: u.id == ^user_id,
+    where: c.commit_date >= ^lower and c.commit_date <= ^upper
+    )
+    |> Repo.all()
+
+    files = (from f in File,
+    join: e in assoc(f, :topic_entries),
+    join: t in assoc(e, :topic),
+    join: r in assoc(f, :git_repo),
+    join: u in assoc(r, :user), on: u.id == ^user_id and u.notes_repo_id == r.id,
+    where: f.file_name_date >= ^lower and f.file_name_date <= ^upper,
+    preload: [topic_entries: {e, topic: t}]
+    )
+    |> Repo.all()
+
+    {commits, files}
+  end
+
+  alias Ecto
 
   def get_file_by(repo_id, params) do
     params = Map.put(params, :git_repo_id, repo_id)
@@ -88,12 +149,7 @@ defmodule GitNotes.Notes do
     get_file(file.id)
   end
 
-  def update_file(%File{} = file, attrs) do
-    file
-    |> Repo.preload(:topic_entries)
-    |> File.update_changeset(attrs)
-    |> Repo.update!()
-  end
+
 
   def delete_user_files(user_id) do
     Repo.delete_all user_files_query(user_id)
@@ -103,10 +159,6 @@ defmodule GitNotes.Notes do
     File.changeset(file, attrs)
   end
 
-  @spec change_update_file(
-          GitNotes.Notes.File.t(),
-          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
-        ) :: map
   def change_update_file(%File{} = file, attrs \\ %{}) do
     file
     |> Repo.preload(:topic_entries)

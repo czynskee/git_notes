@@ -46,12 +46,12 @@ SWX: COTN
       "content" => @content,
       "name" => "2020-08-13.md",
       "git_repo_id" => repo.id
-    } 
+    }
 
     # entries = File.find_topic_entries(@content)
-    
+
     # Notes.create_topics_from_entries(entries, user.id, Date.utc_today())
-    
+
     Notes.change_file(%File{}, file)
     |> Map.get(:changes)
     |> Map.get(:topic_entries)
@@ -59,8 +59,6 @@ SWX: COTN
     |> Map.get(:data)
     |> Map.get(:content)
     |> Base.decode64()
-    |> IO.inspect
-
   end
 
 

@@ -38,3 +38,5 @@ npm-debug.log
 
 # this is to keep the private key safe
 *.pem
+
+/.vscode/

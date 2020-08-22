@@ -60,7 +60,7 @@ defmodule GitNotes.Github do
   end
 
   def commit_and_push_file(payload, content) do
-    user = payload.user
+    user = Accounts.get_user(payload.user_id)
     notes_repo = GitRepos.get_repo(user.notes_repo_id)
     token = retrieve_user_token(user)
 
@@ -70,7 +70,7 @@ defmodule GitNotes.Github do
 
     {:ok, last_commit_tree} = @github_api.get_tree(token, user, notes_repo, get_in(last_commit, ["tree", "sha"]))
 
-    date_string = Date.to_iso8601(payload.date)
+    date_string = Date.to_iso8601(payload.id)
 
     new_tree_payload = %{
       "base_tree" => last_commit_tree["sha"],
@@ -144,7 +144,7 @@ defmodule GitNotes.Github do
     |> Enum.map(& &1["name"])
     |> retrieve_and_prepare_files(token, user, repo)
     |> Enum.map(& Map.put &1, "git_repo_id", repo.id)
-    |> Enum.each(&(Notes.create_or_update_file(&1)))
+    |> Enum.each(&(Notes.create_or_update_file(&1, user.id)))
 
     GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "updated_file", %{})
   end
@@ -164,7 +164,7 @@ defmodule GitNotes.Github do
     |> Enum.each(fn file ->
       file
       |> Map.put("git_repo_id", repo.id)
-      |> Notes.create_or_update_file()
+      |> Notes.create_or_update_file(user.id)
     end)
 
     removed_files
