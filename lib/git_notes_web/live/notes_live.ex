@@ -8,17 +8,16 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def mount(_params, session, socket) do
-
-
     date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
 
     socket = socket
     |> assign(:user, Accounts.get_user(session["user_id"]))
+    |> assign(:add_date_action, "append")
     |> assign(:date_range, date_range)
     |> get_topic_info()
     |> clear_search_topics()
 
-    {:ok, socket}
+    {:ok, socket, temporary_assigns: [date_range: []]}
   end
 
 
@@ -34,30 +33,11 @@ defmodule GitNotesWeb.NotesLive do
   #   {:noreply, socket}
   # end
 
-  # def handle_event("commit_notes", _value, %{assigns: %{editing: false}} = socket) do
-  #   socket = socket
-  #   |> assign(:editing, true)
-
-  #   {:noreply, socket}
-  # end
-
-  # def handle_event("commit_notes", %{"file" => %{"content" => content}}, socket) do
-  #   Github.commit_and_push_file(socket.assigns, content)
-  #   socket = socket
-  #   |> assign(:editing, false)
-
-  #   {:noreply, socket}
-  # end
-
-  def handle_event("change_range", value, socket) do
-    amount = if is_integer(value["amount"]), do: value["amount"], else: Integer.parse(value["amount"]) |> elem(0)
-    |> IO.inspect
-
-    date_range = socket.assigns.date_range
-    |> Enum.map(& Date.add(&1, amount))
+  def handle_event("change_range", %{"new_date" => date, "add_date_action" => action}, socket) do
 
     socket = socket
-    |> assign(:date_range, date_range)
+    |> assign(:add_date_action, action)
+    |> assign(:date_range, [Date.from_iso8601!(date)])
 
     {:reply, %{}, socket}
   end

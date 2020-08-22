@@ -1,4 +1,4 @@
-<div id="days-container" phx-hook="Days">
+<div id="days-container" phx-hook="Days" phx-update=<%= @add_date_action %>>
 <%= for date <- @date_range do %>
   <%= live_component @socket, GitNotesWeb.DayComponent, id: date,
     user_id: @user.id

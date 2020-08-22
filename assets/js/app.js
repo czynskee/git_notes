@@ -52,6 +52,12 @@ let Hooks = {
     loading: false,
     scrollTop: document.documentElement.scrollTop,
     height: document.documentElement.offsetHeight,
+    incrementDate(dateString, amount) {
+      let date = new Date(dateString);
+      date = date.setDate(date.getDate() + amount);
+      date = new Date(date);
+      return date.toISOString().split("T")[0]
+    },
     beforeUpdate() {
       this.scrollTop = document.documentElement.scrollTop;
       this.height = document.documentElement.offsetHeight;
@@ -61,20 +67,26 @@ let Hooks = {
         if (this.loading) return;
         let page = document.documentElement
         let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
+
         if (percentage < 0.3) {
           this.loading = true;
-          this.pushEvent("change_range", {amount: -1}, () => {
+          let newDate = this.incrementDate(this.el.firstElementChild.id, -1)
+          this.pushEvent("change_range", {new_date: newDate, add_date_action: "prepend"}, () => {
             this.loading = false;
-            let addedElHeight = this.el.firstElementChild.offsetHeight
-            document.documentElement.scrollTop = this.scrollTop + addedElHeight;
+            // let addedElHeight = this.el.firstElementChild.offsetHeight
+            // document.documentElement.scrollTop = this.scrollTop + addedElHeight;
+            this.el.lastElementChild.remove()
           })
         }
+
         else if (percentage > 0.7) {
           this.loading = true;
-          this.pushEvent("change_range", {amount: 1}, () => {
+          let newDate = this.incrementDate(this.el.lastElementChild.id, 1)
+          this.pushEvent("change_range", {new_date: newDate, add_date_action: "append"}, () => {
             this.loading = false;
-            let addedElHeight = this.el.lastElementChild.offsetHeight
-            document.documentElement.scrollTop = this.scrollTop - addedElHeight;
+            // let addedElHeight = this.el.lastElementChild.offsetHeight
+            // document.documentElement.scrollTop = this.scrollTop - addedElHeight;
+            this.el.firstElementChild.remove()
           });
         }
       }), 1000, {leading: true})
