@@ -35,7 +35,6 @@ defmodule GitNotesWeb.DayComponent do
     end)
   end
 
-
   def handle_event("edit_commit", _value, %{assigns: %{editing: false}} = socket) do
     {:noreply, assign(socket, :editing, true)}
   end
