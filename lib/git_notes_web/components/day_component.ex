@@ -13,10 +13,14 @@ defmodule GitNotesWeb.DayComponent do
     |> Map.put(:assigns, Map.merge(socket.assigns, assigns))
     |> assign(:file_changeset, Notes.change_file(%Notes.File{}))
     |> assign(:editing, false)
+
+    IO.inspect socket.assigns.file
+
     {:ok, socket}
   end
 
   def preload(list_of_assigns) do
+    IO.inspect list_of_assigns
     lower = List.first(list_of_assigns).id
     upper = List.last(list_of_assigns).id
     user_id = List.first(list_of_assigns).user_id
@@ -39,20 +43,20 @@ defmodule GitNotesWeb.DayComponent do
   end
 
   def handle_event("edit_commit", %{"file" => %{"content" => content}}, socket) do
-    Github.commit_and_push_file(socket.assigns, content)
-    socket = socket
-    |> assign(:editing, false)
+    Task.start(fn -> Github.commit_and_push_file(socket.assigns, content) end)
 
     {:noreply, socket}
   end
 
   def decode_file(file) do
+    IO.puts "here"
     file.topic_entries
     |> Enum.sort(&(&1.file_location <= &2.file_location))
     |> Enum.map(& &1.topic.heading <> (&1.content |> Base.decode64!(ignore: :whitespace)))
     |> Enum.reduce(fn entry, file_content ->
       file_content <> entry
     end)
+    |> IO.inspect
   end
 
   def display_date(date) do

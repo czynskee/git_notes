@@ -159,21 +159,22 @@ defmodule GitNotes.Github do
   def update_notes_files(%User{notes_repo: repo} = user, %{"removed" => removed_files, "added" => added_files, "modified" => modified_files}) do
     token = retrieve_user_token(user)
 
-    added_files ++ modified_files
+    (added_files ++ modified_files
     |> retrieve_and_prepare_files(token, user, repo)
-    |> Enum.each(fn file ->
+    |> Enum.map(fn file ->
       file
       |> Map.put("git_repo_id", repo.id)
       |> Notes.create_or_update_file(user.id)
-    end)
-
-    removed_files
-    |> Enum.each(fn file ->
+    end))
+    ++
+    (removed_files
+    |> Enum.map(fn file ->
       case Notes.get_file_by(repo.id, %{name: file}) do
         nil -> :noop
         existing -> Notes.delete_file(existing)
       end
-    end)
+    end))
+    |> IO.inspect
   end
 
   defp retrieve_records_for_notes_update(repo_id) do

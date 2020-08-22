@@ -8,6 +8,7 @@ defmodule GitNotesWeb.NotesLive do
   end
 
   def mount(_params, session, socket) do
+    GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
     date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
 
     socket = socket
@@ -21,17 +22,20 @@ defmodule GitNotesWeb.NotesLive do
   end
 
 
-  # def handle_info(%{event: "new_commits"}, socket) do
-  #   {:noreply, get_commit_info(socket)}
-  # end
+  def handle_info(%{event: "new_commits", payload: %{"commits" => commits}}, socket) do
+    for commit <- commits do
+      send_update GitNotesWeb.DayComponent, id: commit.commit_date, user_id: socket.assigns.user.id
+    end
+    {:noreply, socket}
+  end
 
-  # def handle_info(%{event: "updated_file"}, socket) do
-
-  #   socket = socket
-  #   |> get_file_info()
-  #   |> get_topic_info()
-  #   {:noreply, socket}
-  # end
+  def handle_info(%{event: "file_change", payload: %{"files" => files}}, socket) do
+    for file <- files do
+      IO.inspect file.file_name_date
+      send_update GitNotesWeb.DayComponent, id: file.file_name_date, user_id: socket.assigns.user.id
+    end
+    {:noreply, socket}
+  end
 
   def handle_event("change_range", %{"new_date" => date, "add_date_action" => action}, socket) do
 

@@ -30,19 +30,6 @@ import "lodash";
 // for.
 
 let Hooks = {
-  // Scrolling: {
-  //   mounted() {
-  //     window.addEventListener("scroll", e => {
-  //       let page = document.documentElement
-  //       let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
-
-  //       if (percentage < 0.1) {
-  //         this.pushEvent("change_range", {amount: -1})
-  //       }
-  //       else if (percentage > 0.9) this.pushEvent("change_range", {amount: 1})
-  //     })
-  //   }
-  // },
   Today: {
     mounted() {
       this.el.scrollIntoView()
@@ -67,26 +54,25 @@ let Hooks = {
         if (this.loading) return;
         let page = document.documentElement
         let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
-
-        if (percentage < 0.3) {
+        if (percentage < 0.2) {
           this.loading = true;
           let newDate = this.incrementDate(this.el.firstElementChild.id, -1)
           this.pushEvent("change_range", {new_date: newDate, add_date_action: "prepend"}, () => {
             this.loading = false;
-            // let addedElHeight = this.el.firstElementChild.offsetHeight
-            // document.documentElement.scrollTop = this.scrollTop + addedElHeight;
-            this.el.lastElementChild.remove()
+            let addedElHeight = this.el.firstElementChild.offsetHeight
+            document.documentElement.scrollTop = this.scrollTop + addedElHeight;
+            // this.el.lastElementChild.remove()
           })
         }
 
-        else if (percentage > 0.7) {
+        else if (percentage > 0.8) {
           this.loading = true;
           let newDate = this.incrementDate(this.el.lastElementChild.id, 1)
           this.pushEvent("change_range", {new_date: newDate, add_date_action: "append"}, () => {
             this.loading = false;
-            // let addedElHeight = this.el.lastElementChild.offsetHeight
-            // document.documentElement.scrollTop = this.scrollTop - addedElHeight;
-            this.el.firstElementChild.remove()
+            let addedElHeight = this.el.lastElementChild.offsetHeight
+            document.documentElement.scrollTop = this.scrollTop - addedElHeight;
+            // this.el.firstElementChild.remove()
           });
         }
       }), 1000, {leading: true})

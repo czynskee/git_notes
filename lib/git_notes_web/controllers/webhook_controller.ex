@@ -73,7 +73,7 @@ defmodule GitNotesWeb.WebhookController do
   end
 
   def webhook(conn, %{"commits" => commits, "ref" => ref, "repository" => %{"id" => repo_id}} = payload) do
-    commits
+    commits = commits
     |> Enum.map(&(Map.put(&1, "git_repo_id", repo_id)))
     |> Enum.map(&(Map.put(&1, "author", get_in(&1, ["author", "name"]))))
     |> Enum.map(&(Map.put(&1, "commit_date",
@@ -81,17 +81,19 @@ defmodule GitNotesWeb.WebhookController do
       |> String.split("T") |> Enum.at(0) |> Date.from_iso8601() |> elem(1))))
     |> Enum.map(&(Map.put(&1, "sha", &1["id"])))
     |> Enum.map(&(Map.put(&1, "ref", ref)))
-    |> Enum.each(&(Commits.create_commit(&1)))
+    |> Enum.map(&(Commits.create_commit!(&1)))
 
     repo = GitRepos.get_repo(repo_id)
-    GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "new_commits", %{})
 
     user = Accounts.get_user_and_notes_repo(repo_id)
 
     if user do
-      Github.update_notes_files(user, payload["head_commit"])
-      GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "updated_file", %{})
+      all_files = Github.update_notes_files(user, payload["head_commit"])
+      GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "file_change", %{"files" => all_files})
     end
+
+    GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "new_commits", %{"commits" => commits})
+
 
     send_resp(conn, 200, "")
   end
