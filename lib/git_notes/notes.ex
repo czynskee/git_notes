@@ -20,14 +20,7 @@ defmodule GitNotes.Notes do
   end
 
   def create_or_update_file(attrs, user_id) do
-    entries = find_topic_entries(attrs["content"])
-    entries = if length(entries) == 0 do
-      default_entry(attrs["content"])
-    else entries
-    end
-    |> create_topics_from_entries(user_id)
-
-    attrs = Map.put(attrs, "topic_entries", entries)
+    attrs = Map.put(attrs, "topic_entries", generate_topic_entries_from_content(attrs["content"], user_id))
 
     case get_file_by(attrs["git_repo_id"], %{name: attrs["name"]}) do
       nil -> create_file(attrs)
@@ -37,6 +30,11 @@ defmodule GitNotes.Notes do
 
   def default_entry(content) do
     ("# Today\n" <> Base.decode64!(content, ignore: :whitespace) ) |> Base.encode64 |> find_topic_entries
+  end
+
+  def generate_topic_entries_from_content(content, user_id) do
+    find_topic_entries(content)
+    |> create_topics_from_entries(user_id)
   end
 
   def create_topics_from_entries(topic_entries, user_id) do
@@ -64,12 +62,16 @@ defmodule GitNotes.Notes do
       {entry_start, entry_end - 1}
     end)
 
-    Enum.zip(topic_delims, entry_delims)
+    case Enum.zip(topic_delims, entry_delims)
     |> Enum.map(fn {{heading_start, topic_start, topic_end}, {entry_start, entry_end}} ->
       { String.slice(decoded_content, heading_start..topic_end),
         String.slice(decoded_content, topic_start..topic_end) |> String.trim(),
       {entry_start, String.slice(decoded_content, entry_start..entry_end)}}
-    end)
+    end) do
+      entries when entries == [] ->
+        default_entry(file_content)
+      entries -> entries
+    end
   end
 
 
@@ -187,6 +189,15 @@ defmodule GitNotes.Notes do
   """
   def list_topics do
     Repo.all(Topic)
+  end
+
+  def list_user_topics_with_entries(user_id) do
+    query = user_topics_query(user_id)
+    (from t in query,
+    join: e in assoc(t, :topic_entries),
+    join: f in assoc(e, :file),
+    preload: [topic_entries: {e, file: f}])
+    |> Repo.all()
   end
 
   def list_user_topics(user_id) do

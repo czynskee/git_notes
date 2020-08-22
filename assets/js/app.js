@@ -15,19 +15,22 @@ import "../css/app.scss"
 import "phoenix_html"
 import "lodash";
 
+function percentageSeen(element) {
+  console.log(window.scrollY)
+  const viewportHeight = window.innerHeight;
+  const scrollTop = window.scrollY;
+  const elementOffsetTop = element.offsetTop;
+  const elementHeight = element.offsetHeight;
 
-// autocomplete
-// when they type we will do a regex to find our topic lookup pattern "/text"
-// when we have the result of the regex, we will look at the selectionstart to see
-// where in the text field they are typing.
-// we can subtract the length of the match from selectionstart and see if it matches the index in the
-// match. If so then we know that this is the match that they are currently typing and the one that
-// should show autocomplete suggestions for. We will send the text in there to the server
-// the server will filter the list of the users topics.
-// should the topic show inline or on the side?
-// if its inline then we need a div to hold the text. When we see that they type a slash we could
-// insert a new div. Then we could just look at the content in that div to see what they're looking
-// for.
+  // Calculate percentage of the element that's been seen
+  const distance = scrollTop + viewportHeight - elementOffsetTop;
+  const percentage = Math.round(
+    distance / ((viewportHeight + elementHeight) / 100)
+  );
+
+  // Restrict the range to between 0 and 100
+  return Math.min(100, Math.max(0, percentage));
+}
 
 let Hooks = {
   Today: {
@@ -39,6 +42,7 @@ let Hooks = {
     loading: false,
     scrollTop: document.documentElement.scrollTop,
     height: document.documentElement.offsetHeight,
+    header: null,
     incrementDate(dateString, amount) {
       let date = new Date(dateString);
       date = date.setDate(date.getDate() + amount);
@@ -49,9 +53,38 @@ let Hooks = {
       this.scrollTop = document.documentElement.scrollTop;
       this.height = document.documentElement.offsetHeight;
     },
+    currentDate() {
+      let currentDate = document.querySelector(".iso-date").innerHTML
+      let children = Array.from(this.el.children)
+      let mostSeenElem = null;
+      let highestAmountShown = -1;
+
+      for (let child of children) {
+        let childLocation = child.getBoundingClientRect()
+        let childBottom = childLocation.y + childLocation.height
+        if (childBottom > 0 && childLocation.y < window.innerHeight) {
+          let childCutoffTop = childLocation.y < 0 ? 0 : childLocation.y
+          let childCutoffBottom = childBottom > window.innerHeight ? window.innerHeight : childBottom
+          let totalAmountShown = childCutoffBottom - childCutoffTop
+          if (totalAmountShown > highestAmountShown) {
+            mostSeenElem = child;
+            highestAmountShown = totalAmountShown;
+          }
+        }
+      }
+
+      let date = mostSeenElem.id.split("-").slice(1).join("-")
+      if (currentDate !== date) {
+        console.log(date, currentDate)
+        this.pushEvent("current_date", {date})
+      }
+    },
     mounted() {
+      this.header = document.querySelector(".day-header")
+      this.currentDate()
       window.addEventListener("scroll", _.throttle(e => {
         if (this.loading) return;
+        this.currentDate()
         let page = document.documentElement
         let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
         if (percentage < 0.2) {
@@ -106,12 +139,15 @@ let Hooks = {
             this.searching = true;
             found = true;
             this.searchTerm = match[1].slice(1)
-            this.pushEvent("search_term", {term: this.searchTerm, modifier: match[2]});
+            console.log(this.el.id)
+            this.pushEventTo(`#${this.el.id}`, "search_term", {term: this.searchTerm, modifier: match[2]}, (reply, ref) => {
+              console.log(reply, ref)
+            });
           }
         }
         if (found == false && this.searching == true) {
           this.searching = false;
-          this.pushEvent("search_term", {term: ""})
+          this.pushEventTo(`#${this.el.id}`, "search_term", {term: ""})
         }
         })
       
@@ -119,25 +155,25 @@ let Hooks = {
         if (this.searching) {
           if (e.key == "ArrowUp") {
             e.preventDefault()
-            this.pushEvent("select_topic", {direction: "up"})
+            this.pushEventTo(`#${this.el.id}`, "select_topic", {direction: "up"})
           } else if (e.key == "ArrowDown") {
             e.preventDefault()
-            this.pushEvent("select_topic", {direction: "down"})
+            this.pushEventTo(`#${this.el.id}`, "select_topic", {direction: "down"})
           } else if (e.key == "Enter") {
             this.removeSearchTerm()
             e.preventDefault()
             this.searching = false
-            this.pushEvent("insert_topic", {content: this.el.value, location: this.el.selectionStart})
+            this.pushEventTo(`#${this.el.id}`, "insert_topic", {content: this.el.value, location: this.el.selectionStart})
           } else if (e.key == "Escape") {
             this.removeSearchTerm()
             this.searching = false;
-            this.pushEvent("search_term", {term: ""})
+            this.pushEventTo(`#${this.el.id}`, "search_term", {term: ""})
           } else if (e.key == "ArrowLeft") {
             e.preventDefault()
-            this.pushEvent("select_topic", {direction: "left"})
+            this.pushEventTo(`#${this.el.id}`, "select_topic", {direction: "left"})
           } else if (e.key == "ArrowRight") {
             e.preventDefault()
-            this.pushEvent("select_topic", {direction: "right"})
+            this.pushEventTo(`#${this.el.id}`, "select_topic", {direction: "right"})
           }
         }
       })

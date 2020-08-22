@@ -1,28 +1,8 @@
-<div>
-  <%= @user.login %>
-</div>
+<%= render GitNotesWeb.NotesView, "day_header.html", assigns %>
 
 <div id="day-notes" phx-hook="DayLoader">
-  <%= for %{date: date, file: file, commits: commits} <- @date_info do %>
-    <div id=<%= date %>>
-      <div>
-        Date: <%= date %>
-      </div>
-      <div>
-        <%= f = form_for @changeset, "#", [phx_submit: :edit_commit] %>
-          <%= text_input f, :date, value: date, class: "hide" %>
-          <%= textarea f, :content, class: "notes-textarea", value: file && decode_file(file), phx_hook: "Topics" %>
-          <%= submit "Save" %>
-        </form>
-
-      </div>
-      <div>
-        Commits
-        <%= for commit <- commits do %>
-          <%= commit.sha %>
-        <% end %>
-      </div>
-
-    </div>
+  <%= for date <- @date_range do %>
+    <%= live_component @socket, GitNotesWeb.DayComponent,
+    date: date, id: date, user: @user, topics: @topics %>
   <% end %>
 </div>

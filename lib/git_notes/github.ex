@@ -59,7 +59,7 @@ defmodule GitNotes.Github do
     |> @github_api.get_installation_repos()
   end
 
-  def commit_and_push_file(content, user, date_string) do
+  def commit_and_push_file(content, user, date) do
     # user = Accounts.get_user(payload.user_id)
     notes_repo = GitRepos.get_repo(user.notes_repo_id)
     token = retrieve_user_token(user)
@@ -70,7 +70,7 @@ defmodule GitNotes.Github do
 
     {:ok, last_commit_tree} = @github_api.get_tree(token, user, notes_repo, get_in(last_commit, ["tree", "sha"]))
 
-    # date_string = Date.to_iso8601(payload.id)
+    date_string = Date.to_iso8601(date)
 
     new_tree_payload = %{
       "base_tree" => last_commit_tree["sha"],

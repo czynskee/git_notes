@@ -1,0 +1,51 @@
+<div id=<%= "date-#{@date}" %> class ="day">
+<%= @date %>
+  <div>
+    <%= f = form_for @changeset, "#", [phx_submit: :edit_commit, phx_target: @myself] %>
+      <%= textarea f, :content, id: "file-#{@date}", class: "notes-textarea", value: @file && decode_file(@file), phx_hook: "Topics" %>
+      <%= submit "Save" %>
+    </form>
+
+  </div>
+  <div>
+    <%= length(@commits) %>
+    Commits
+    <%= for commit <- @commits do %>
+      <div id= <%= commit.id %>>
+        <%= commit.sha %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= if length(@search_topics) > 0 do %>
+  <h4> Searching Topics... </h4>
+  <div>
+    <%= for {search_topic, i} <- Enum.with_index(@search_topics) do %>
+      <div>
+        <span
+          <%= i == @search_topic_index && "style=color:red;" %>>
+        <%= search_topic.name %>
+        </span>
+        <%= if i == @search_topic_index do %>
+          <div style="display: flex">
+            <%= for {topic_entry, i} <- search_topic.topic_entries |> Enum.reverse |> Enum.with_index do %>
+              <div
+                <%= i == @search_topic_entry_index && "style=color:red;" %>>
+                <%= topic_entry.file.file_name_date %>
+                <%= if i == @search_topic_entry_index do %>
+                  <div>
+                    <%= topic_entry.content |> Base.decode64! %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+  </div>
+
+</div>
