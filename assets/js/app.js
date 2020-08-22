@@ -35,7 +35,7 @@ let Hooks = {
       this.el.scrollIntoView()
     }
   },
-  Days: {
+  DayLoader: {
     loading: false,
     scrollTop: document.documentElement.scrollTop,
     height: document.documentElement.offsetHeight,
@@ -56,8 +56,9 @@ let Hooks = {
         let percentage = page.scrollTop / (page.scrollHeight - page.clientHeight);
         if (percentage < 0.2) {
           this.loading = true;
-          let newDate = this.incrementDate(this.el.firstElementChild.id, -1)
-          this.pushEvent("change_range", {new_date: newDate, add_date_action: "prepend"}, () => {
+          // let newDate = this.incrementDate(this.el.firstElementChild.id, -1)
+          // this.pushEvent("change_range", {new_date: newDate, add_date_action: "prepend"}, () => {
+            this.pushEvent("change_range", {direction: "back"}, () => {
             this.loading = false;
             let addedElHeight = this.el.firstElementChild.offsetHeight
             document.documentElement.scrollTop = this.scrollTop + addedElHeight;
@@ -67,8 +68,9 @@ let Hooks = {
 
         else if (percentage > 0.8) {
           this.loading = true;
-          let newDate = this.incrementDate(this.el.lastElementChild.id, 1)
-          this.pushEvent("change_range", {new_date: newDate, add_date_action: "append"}, () => {
+          // let newDate = this.incrementDate(this.el.lastElementChild.id, 1)
+          // this.pushEvent("change_range", {new_date: newDate, add_date_action: "append"}, () => {
+            this.pushEvent("change_range", {direction: "forward"}, () => {
             this.loading = false;
             let addedElHeight = this.el.lastElementChild.offsetHeight
             document.documentElement.scrollTop = this.scrollTop - addedElHeight;

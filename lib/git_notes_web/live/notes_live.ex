@@ -10,43 +10,80 @@ defmodule GitNotesWeb.NotesLive do
   def mount(_params, session, socket) do
     GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
     date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
+    |> Enum.to_list()
 
     socket = socket
     |> assign(:user, Accounts.get_user(session["user_id"]))
-    |> assign(:add_date_action, "append")
     |> assign(:date_range, date_range)
+    |> assign(:changeset, Notes.change_file(%Notes.File{}))
     |> get_topic_info()
     |> clear_search_topics()
 
-    {:ok, socket, temporary_assigns: [date_range: []]}
+    {:ok, fetch_day_info(socket)}
   end
 
+  defp clear_search_topics(socket) do
 
-  def handle_info(%{event: "new_commits", payload: %{"commits" => commits}}, socket) do
-    for commit <- commits do
-      send_update GitNotesWeb.DayComponent, id: commit.commit_date, user_id: socket.assigns.user.id
-    end
+    socket
+    |> assign(:search_topics, [])
+    |> assign(:search_topic_index, 0)
+    |> assign(:search_topic_entry_index, 0)
+  end
+
+  defp get_topic_info(socket) do
+    topics = Notes.list_user_topics(socket.assigns.user.id)
+
+    socket
+    |>assign(:topics, topics)
+  end
+
+  @spec fetch_day_info(Phoenix.LiveView.Socket.t()) :: Phoenix.LiveView.Socket.t()
+  def fetch_day_info(socket) do
+    lower = List.first(socket.assigns.date_range)
+    upper = List.last(socket.assigns.date_range)
+    user_id = socket.assigns.user.id
+
+    {commits, files} = Notes.get_file_and_commit_date_range(user_id, lower, upper)
+
+    date_info = socket.assigns.date_range
+    |> Enum.map(fn date ->
+      commits = Enum.filter(commits, & &1.commit_date == date)
+      file = Enum.filter(files, & &1.file_name_date == date) |> Enum.at(0)
+
+      %{
+        date: date,
+        commits: commits,
+        file: file
+      }
+    end)
+
+    assign(socket, :date_info, date_info)
+  end
+
+  def handle_info(%{event: "new_commits", payload: %{"commits" => _commits}}, socket) do
+    {:noreply, fetch_day_info(socket)}
+  end
+
+  def handle_info(%{event: "file_change", payload: %{"files" => _files}}, socket) do
+    {:noreply, fetch_day_info(socket)}
+  end
+
+  def handle_event("edit_commit", %{"file" => %{"content" => content, "date" => date}}, socket) do
+    Task.start(fn -> Github.commit_and_push_file(content, socket.assigns.user, date) end)
+
     {:noreply, socket}
   end
 
-  def handle_info(%{event: "file_change", payload: %{"files" => files}}, socket) do
-    for file <- files do
-      send_update GitNotesWeb.DayComponent, id: file.file_name_date, user_id: socket.assigns.user.id
-    end
-    {:noreply, socket}
-  end
+  # def handle_event("change_range", value, socket) do
+  #   IO.inspect value
 
-  def handle_event("change_range", %{"new_date" => date, "add_date_action" => action}, socket) do
-    socket = socket
-    |> assign(:add_date_action, action)
-    |> assign(:date_range, [Date.from_iso8601!(date)])
+  #   {:noreply, socket}
+  # end
 
-    {:reply, %{}, socket}
-  end
-
-  def handle_event("refresh_files", _value, socket) do
-    Github.populate_notes(socket.assigns.user.notes_repo_id)
-    {:noreply, socket}
+  def handle_event("change_range", %{"direction" => direction}, socket) do
+    amount = if direction == "back", do: -1, else: 1
+    socket = assign(socket, :date_range, Enum.map(socket.assigns.date_range, & Date.add(&1, amount)))
+    {:noreply, fetch_day_info(socket)}
   end
 
   def handle_event("search_term", %{"term" => term}, socket) do
@@ -165,20 +202,51 @@ defmodule GitNotesWeb.NotesLive do
     {:noreply, socket}
   end
 
-  defp clear_search_topics(socket) do
-
-    socket
-    |> assign(:search_topics, [])
-    |> assign(:search_topic_index, 0)
-    |> assign(:search_topic_entry_index, 0)
-  end
 
 
-
-  defp get_topic_info(socket) do
-    topics = Notes.list_user_topics(socket.assigns.user.id)
-
-    socket
-    |>assign(:topics, topics)
-  end
 end
+
+#   def mount(_params, session, socket) do
+#     GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
+#     date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
+
+#     socket = socket
+#     |> assign(:user, Accounts.get_user(session["user_id"]))
+#     |> assign(:add_date_action, "append")
+#     |> assign(:date_range, date_range)
+#     |> get_topic_info()
+#     |> clear_search_topics()
+
+#     {:ok, socket}
+#   end
+
+
+#   def handle_info(%{event: "new_commits", payload: %{"commits" => commits}}, socket) do
+#     for commit <- commits do
+#       send_update GitNotesWeb.DayComponent, id: commit.commit_date, user_id: socket.assigns.user.id
+#     end
+#     {:noreply, socket}
+#   end
+
+#   def handle_info(%{event: "file_change", payload: %{"files" => files}}, socket) do
+#     for file <- files do
+#       send_update GitNotesWeb.DayComponent, id: file.file_name_date, user_id: socket.assigns.user.id
+#     end
+#     {:noreply, socket}
+#   end
+
+#   def handle_event("change_range", %{"new_date" => date, "add_date_action" => action}, socket) do
+#     socket = socket
+#     |> assign(:add_date_action, action)
+#     |> assign(:date_range, [Date.from_iso8601!(date)])
+
+#     {:reply, %{}, socket}
+#   end
+
+#   def handle_event("refresh_files", _value, socket) do
+#     Github.populate_notes(socket.assigns.user.notes_repo_id)
+#     {:noreply, socket}
+#   end
+
+
+# end

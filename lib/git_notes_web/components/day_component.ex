@@ -8,7 +8,6 @@ defmodule GitNotesWeb.DayComponent do
     {:ok, socket}
   end
 
-
   def update(assigns, socket) do
     socket = socket
     |> Map.put(:assigns, Map.merge(socket.assigns, assigns))

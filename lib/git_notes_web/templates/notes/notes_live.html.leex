@@ -1,45 +1,28 @@
-<button phx-click="change_range" phx-value-amount=-1> Previous </button>
-<button phx-click="change_range" phx-value-amount=1> Next </button>
-
-
-<div class="header" id="header">
-  <button phx-click="refresh_files"> Refresh Notes from Github </button>
-  <div>
-    <%= @user.login %>
-  </div>
+<div>
+  <%= @user.login %>
 </div>
 
-<%= render GitNotesWeb.NotesView, "notes_main_live.html", assigns %>
-
-<%= if length(@search_topics) > 0 do %>
-  <h4> Searching Topics... </h4>
-  <div>
-    <%= for {search_topic, i} <- Enum.with_index(@search_topics) do %>
+<div id="day-notes" phx-hook="DayLoader">
+  <%= for %{date: date, file: file, commits: commits} <- @date_info do %>
+    <div id=<%= date %>>
       <div>
-        <span
-          <%= i == @search_topic_index && "style=color:red;" %>>
-        <%= search_topic.name %>
-        </span>
-        <%= if i == @search_topic_index do %>
-          <div style="display: flex">
-            <%= for {topic_entry, i} <- search_topic.topic_entries |> Enum.reverse |> Enum.with_index do %>
-              <div
-                <%= i == @search_topic_entry_index && "style=color:red;" %>>
-                <%= topic_entry.file.file_name_date %>
-                <%= if i == @search_topic_entry_index do %>
-                  <div>
-                    <%= topic_entry.content |> Base.decode64! %>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
+        Date: <%= date %>
+      </div>
+      <div>
+        <%= f = form_for @changeset, "#", [phx_submit: :edit_commit] %>
+          <%= text_input f, :date, value: date, class: "hide" %>
+          <%= textarea f, :content, class: "notes-textarea", value: file && decode_file(file), phx_hook: "Topics" %>
+          <%= submit "Save" %>
+        </form>
+
+      </div>
+      <div>
+        Commits
+        <%= for commit <- commits do %>
+          <%= commit.sha %>
         <% end %>
       </div>
-    <% end %>
-  </div>
-<% end %>
 
-<button phx-click="change_range" phx-value-amount=-1> Previous </button>
-<button phx-click="change_range" phx-value-amount=1> Next </button>
-<button phx-click="refresh_files"> Refresh Notes from Github </button>
+    </div>
+  <% end %>
+</div>
