@@ -31,14 +31,12 @@ defmodule GitNotesWeb.NotesLive do
 
   def handle_info(%{event: "file_change", payload: %{"files" => files}}, socket) do
     for file <- files do
-      IO.inspect file.file_name_date
       send_update GitNotesWeb.DayComponent, id: file.file_name_date, user_id: socket.assigns.user.id
     end
     {:noreply, socket}
   end
 
   def handle_event("change_range", %{"new_date" => date, "add_date_action" => action}, socket) do
-
     socket = socket
     |> assign(:add_date_action, action)
     |> assign(:date_range, [Date.from_iso8601!(date)])

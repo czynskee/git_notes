@@ -174,7 +174,6 @@ defmodule GitNotes.Github do
         existing -> Notes.delete_file(existing)
       end
     end))
-    |> IO.inspect
   end
 
   defp retrieve_records_for_notes_update(repo_id) do

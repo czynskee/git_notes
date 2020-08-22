@@ -89,7 +89,7 @@ defmodule GitNotesWeb.WebhookController do
 
     if user do
       all_files = Github.update_notes_files(user, payload["head_commit"])
-      GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "file_change", %{"files" => all_files})
+      # GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "file_change", %{"files" => all_files})
     end
 
     GitNotesWeb.Endpoint.broadcast("user: #{repo.user_id}", "new_commits", %{"commits" => commits})

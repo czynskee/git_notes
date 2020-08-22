@@ -54,4 +54,8 @@ defmodule GitNotes.Commits do
     Repo.get(Commit, id)
   end
 
+  def delete_commit!(commit) do
+    Repo.delete!(commit)
+  end
+
 end

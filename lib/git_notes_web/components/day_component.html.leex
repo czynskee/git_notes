@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div class="notes-text-commits-container">
+  <div class="notes-text-commits-container" phx-update="replace">
     <div class="notes-text-container">
       <%= f = form_for @file_changeset, "#", [phx_submit: :edit_commit, phx_target: @myself] %>
         <%= textarea f, :content,
