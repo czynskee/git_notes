@@ -130,8 +130,23 @@ let Hooks = {
       }
 
     },
+    findTextareaSize() {
+      let dateSelector = this.el.id.replace("file", "date")
+      let commitDiv = document.querySelector(`#${dateSelector} .commits`)
+      console.log(commitDiv)
+      let hiddenDiv = document.querySelector(`#${this.el.id} ~ .text-placeholder`);
+      hiddenDiv.style.visibility = "hidden";
+      hiddenDiv.style.display = 'block'
+      hiddenDiv.innerHTML = this.el.value;
+      let height = hiddenDiv.offsetHeight > 400 ? hiddenDiv.offsetHeight : 400;
+      this.el.style.height = height + 'px';
+      hiddenDiv.style.visibility = 'visible';
+      hiddenDiv.style.display = 'none';
+    },
     mounted() {
+      this.findTextareaSize()
       this.el.addEventListener("input", e => {
+        this.findTextareaSize()
         let matches = [...this.el.value.matchAll(/(\/.+?)(?:((?:-|\+)\d)|$)/gm)]
         let found = false;
         for (let match of matches) {
@@ -149,7 +164,8 @@ let Hooks = {
           this.searching = false;
           this.pushEventTo(`#${this.el.id}`, "search_term", {term: ""})
         }
-        })
+
+      })
       
         this.el.addEventListener("keydown", e => {
         if (this.searching) {

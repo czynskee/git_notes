@@ -22,6 +22,10 @@ defmodule GitNotesWeb.NotesView do
         "Last #{Date.day_of_week(date) |> day_name()}"
       diff >= 2 && diff < 7 ->
         "#{Date.day_of_week(date) |> day_name()}"
+      diff <= -7 ->
+        "Last Week #{Date.day_of_week(date) |> day_name()}"
+      diff >= 7 ->
+        "Next Week #{Date.day_of_week(date) |> day_name()}"
       diff == 1 ->
         "Tomorrow"
       true ->

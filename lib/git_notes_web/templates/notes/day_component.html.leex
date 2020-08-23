@@ -1,20 +1,28 @@
 <div id=<%= "date-#{@date}" %> class ="day">
-<%= @date %>
-  <div>
-    <%= f = form_for @changeset, "#", [phx_submit: :edit_commit, phx_target: @myself] %>
-      <%= textarea f, :content, id: "file-#{@date}", class: "notes-textarea", value: @file && decode_file(@file), phx_hook: "Topics" %>
-      <%= submit "Save" %>
-    </form>
-
+  <div class="day-header">
+    <div class="date"> <%= @date %> </div>
+    <div class="date-day"> <%= Date.day_of_week(@date) |> day_name() %> </div>
+    <div class="commits-header"> <%= length(@commits) %> Commits </div>
   </div>
-  <div>
-    <%= length(@commits) %>
-    Commits
-    <%= for commit <- @commits do %>
-      <div id= <%= commit.id %>>
-        <%= commit.sha %>
-      </div>
-    <% end %>
+
+  <div class="notes-container">
+    <div class="notes">
+      <%= f = form_for @changeset, "#", [phx_submit: :edit_commit, phx_target: @myself] %>
+        <%= textarea f, :content, id: "file-#{@date}", class: "notes-textarea", value: @file && decode_file(@file), phx_hook: "Topics" %>
+        <%= submit "Save", class: "submit-button" %>
+        <div class="text-placeholder">
+          <%= @file && decode_file(@file) %>
+        </div>
+      </form>
+    </div>
+
+    <div class="commits">
+      <%= for commit <- @commits do %>
+        <div id= <%= commit.id %>>
+          <%= commit.sha %>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <div>

@@ -15,6 +15,7 @@ defmodule GitNotesWeb.DayComponent do
     socket = assign(socket,
       changeset: Notes.change_file(%Notes.File{}))
       |> clear_search_topics()
+      |> IO.inspect
 
     {:ok, assign(socket, assigns)}
   end

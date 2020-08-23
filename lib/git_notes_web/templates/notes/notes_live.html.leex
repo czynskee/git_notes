@@ -1,4 +1,4 @@
-<%= render GitNotesWeb.NotesView, "day_header.html", assigns %>
+<%= render GitNotesWeb.NotesView, "header.html", assigns %>
 
 <div id="day-notes" phx-hook="DayLoader">
   <%= for date <- @date_range do %>

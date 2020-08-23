@@ -1,5 +1,9 @@
 /* This file is for your main application css. */
-@import "./phoenix.css";
+// @import "./phoenix.css";
+
+* {
+  box-sizing: border-box;
+}
 
 /* Alerts and form errors */
 .alert {
@@ -36,18 +40,77 @@ body, html {
   font-family: 'Roboto', sans-serif;
 }
 
-.hide {
-  display: none;
-}
-
-
 .day {
-  border: 1px solid gray;
-  border-radius: 2px;
-  margin: 2em 1em 2em;
+  border-left: 1px solid gray;
+  border-right: 1px;
+  margin: 0 1em 0 1em;
+
+  & .notes-container {
+    display: flex;
+    width: 100%;
+
+    & .notes {
+      width: 70%;
+      margin-left: 1em;
+      position: relative;
+
+      & textarea {
+        resize: none;
+        border: 1px solid gray;
+        // border: 0;
+        // border-left: 1px solid gray;
+        // border-right: 1px solid gray;
+        overflow: hidden;
+        border-radius: 0;
+        height: 400px;
+        width: 100%;
+      }
+
+      & .text-placeholder {
+        display: none;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      & .submit-button {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        margin: 0;
+        padding: 0.5em;
+        // transform: translate(0, 0);
+      }
+    }
+
+    & .commits {
+      width: 30%;
+      margin: 0 1em 0 1em;
+      background-color: rgba(193, 193, 193, 0.8);
+    }
+  }
 }
 
 .day-header {
+  display: flex;
+  width: 100%;
+  padding: 1em 0 1em;
+  & .date {
+    margin: 0 0 0 2em;
+    width: 35%;
+  }
+
+  & .date-day {
+    width: 35%;
+  }
+
+  & .commits-header {
+    width: 30%;
+    text-align: left;
+  }
+
+}
+
+.header {
   position: fixed;
   top: 0;
   width: 100%;
@@ -57,6 +120,7 @@ body, html {
   font-weight: 700;
   font-size: 2em;
   background-color: rgba(193, 193, 193, 0.8);
+  z-index: 1;
   & .date-descriptor {
     margin-left: 1em;
   }
@@ -71,50 +135,46 @@ body, html {
   }
 }
 
-.notes-main {
-  & .notes-main-header {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+// .notes-main {
+//   & .notes-main-header {
+//     display: flex;
+//     justify-content: space-between;
+//     width: 100%;
 
-  }
+//   }
 
-  & textarea {
-    resize: none;
-  }
+//   & textarea {
+//     resize: none;
+//   }
 
-  & .commit-button, .edit-button {
-    display: block;
-    margin-left: auto;
-  }
+//   & .commit-button, .edit-button {
+//     display: block;
+//     margin-left: auto;
+//   }
 
-  & .commit-button {
-    background-color: orange;
-  }
+//   & .commit-button {
+//     background-color: orange;
+//   }
 
-  & .notes-text-commits-container {
-    display: flex;
-  }
-}
+//   & .notes-text-commits-container {
+//     display: flex;
+//   }
+// }
 
-.notes-text-container {
-  width: 70%;
-}
+// .notes-text-container {
+//   width: 70%;
+// }
 
-.commits-container {
-  width: 30%;
-  text-align: center;
-  max-height: 400px;
-  overflow-y: auto;
-}
+// .commits-container {
+//   width: 30%;
+//   text-align: center;
+//   max-height: 400px;
+//   overflow-y: auto;
+// }
 
-.topic-entry {
-  white-space: pre-wrap;
-  border: none;
-  box-sizing: border-box;
-  padding: 5px;
-}
-
-.notes-textarea {
-  height: 400px;
-}
+// .topic-entry {
+//   white-space: pre-wrap;
+//   border: none;
+//   box-sizing: border-box;
+//   padding: 5px;
+// }
