@@ -20,19 +20,19 @@ Administration: Read-only
 Contents: Read & Write
 
 You'll also need to subscribe to these events:
-[x] Member
-[x] Meta
-[x] Push
-[x] Repository
+- [x] Member
+- [x] Meta
+- [x] Push
+- [x] Repository
 
 You will also need to set up some environmental variables. I do this by saving the following (with the appropriate values filled in) to a `.env` file and making sure that your build system has access to them. **Ensure that you add the .env file to your .gitignore file to prevent it from being pushed to github!**In a local development environment on Linux you can simply key in `source .env` in the terminal that you start the server from. The process may vary depending on how and where you build the app from.
 
-export GITHUB_APP_ID=*your github app id*
-export GITHUB_CLIENT_ID=*your github client id*
-export GITHUB_CLIENT_SECRET=*your github client secret*
-export GITHUB_WEBHOOK_SECRET=*your github webhook secret*
-export LIVE_VIEW_SIGNING_SALT=*your Phoenix LiveView signing salt, can be generated with* `mix phx.gen.secret 32`
-export PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+- export GITHUB_APP_ID=*your github app id*
+- export GITHUB_CLIENT_ID=*your github client id*
+- export GITHUB_CLIENT_SECRET=*your github client secret*
+- export GITHUB_WEBHOOK_SECRET=*your github webhook secret*
+- export LIVE_VIEW_SIGNING_SALT=*your Phoenix LiveView signing salt, can be generated with* `mix phx.gen.secret 32`
+- export PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
 *your private SSH key with a corresponding public key held by github - used for JWTs*
 -----END RSA PRIVATE KEY-----"
 
