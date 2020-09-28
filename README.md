@@ -8,7 +8,7 @@ To run this app you'll need to create a Git app [here](https://github.com/settin
 
 - User authorization callback URL: `<your-url>/sessions/new`
 - Webhook:
-- [x] Active
+ - [x] Active
 - Webhook URL: a public facing url that github can access. While in development I recommend using [ngrok](). The url should be appended with the path `/webhooks` (e.g.: `https://3lk24u89fj234df.ngrok.io/webhooks`).
 
 It is recommended to setup a webhook secret and to enable SSL verification. 
