@@ -2,6 +2,9 @@
 
 This is a Github App that can be used to take notes that will be synced to a git repo of your choosing. All notes saved in the app are pushed to the git repo and all notes that are pushed to the git repo will be available in the app. The app will ask for access to your git repos but it will only push to the repo that you select as your notes repo. For all other repos, it will pull your commit history. The app will display all of your commits by day alongside your notes for that day.
 
+The app in action:
+![git notes in action](https://github.com/czynskee/git_notes/blob/master/git_notes_in_action.png?raw=true)
+
 Each file in the git repo must be named by date in this format: `YYYY-MM-DD.md`.
 
 To run this app you'll need to create a Git app [here](https://github.com/settings/apps). These fields will need to be set in the github app config:
