@@ -6,18 +6,18 @@ Each file in the git repo must be named by date in this format: `YYYY-MM-DD.md`.
 
 To run this app you'll need to create a Git app [here](https://github.com/settings/apps). These fields will need to be set in the github app config:
 
-User authorization callback URL: `<your-url>/sessions/new`
-Webhook:
-[x] Active
-Webhook URL: a public facing url that github can access. While in development I recommend using [ngrok](). The url should be appended with the path `/webhooks` (e.g.: `https://3lk24u89fj234df.ngrok.io/webhooks`).
+- User authorization callback URL: `<your-url>/sessions/new`
+- Webhook:
+- [x] Active
+- Webhook URL: a public facing url that github can access. While in development I recommend using [ngrok](). The url should be appended with the path `/webhooks` (e.g.: `https://3lk24u89fj234df.ngrok.io/webhooks`).
 
 It is recommended to setup a webhook secret and to enable SSL verification. 
 
-Also, in the github app you will need to set up a public facing url that github can access. While in development, I recommend using [ngrok].
+Also, in the github app you will need to set up a public facing url that github can access. While in development, I recommend using [ngrok](https://ngrok.com/).
 
 Under Permissions & events you'll need to set these repository permissions:
-Administration: Read-only
-Contents: Read & Write
+- Administration: Read-only
+- Contents: Read & Write
 
 You'll also need to subscribe to these events:
 - [x] Member
