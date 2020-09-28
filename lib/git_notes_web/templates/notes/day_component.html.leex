@@ -19,7 +19,8 @@
     <div class="commits">
       <%= for commit <- @commits do %>
         <div id= <%= commit.id %>>
-          <%= commit.sha %>
+          <%= String.slice(commit.sha, 0, 5) <> "...  " %>
+          <%= commit.message %>
         </div>
       <% end %>
     </div>

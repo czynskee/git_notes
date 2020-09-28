@@ -9,7 +9,7 @@ defmodule GitNotesWeb.NotesLive do
 
   def mount(_params, session, socket) do
     GitNotesWeb.Endpoint.subscribe("user: #{session["user_id"]}")
-    date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), 2))
+    date_range = Date.range(Date.add(Date.utc_today(), -2), Date.add(Date.utc_today(), -2))
     |> Enum.to_list()
 
     socket = socket
