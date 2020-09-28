@@ -48,6 +48,7 @@ body, html {
   & .notes-container {
     display: flex;
     width: 100%;
+    // border-left: 1px solid gray;   
 
     & .notes {
       width: 70%;
@@ -56,14 +57,23 @@ body, html {
 
       & textarea {
         resize: none;
-        border: 1px solid gray;
-        // border: 0;
-        // border-left: 1px solid gray;
-        // border-right: 1px solid gray;
         overflow: hidden;
-        border-radius: 0;
+        border-radius: 2px;
         height: 400px;
         width: 100%;
+        outline: 0;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;  
+        box-shadow: none; border: none; 
+        border-bottom: 1px solid #ced4da; 
+        border-radius: 0; 
+        box-sizing: content-box;
+        background-color: transparent; 
+        padding: 1.5rem 0; 
+        resize: none; 
+      }
+      
+      & textarea:focus {
+        // color: blue;
       }
 
       & .text-placeholder {
@@ -74,8 +84,8 @@ body, html {
 
       & .submit-button {
         position: absolute;
-        bottom: 0;
-        right: 0;
+        bottom: 1em;
+        right: 1em;
         margin: 0;
         padding: 0.5em;
         // transform: translate(0, 0);
@@ -93,7 +103,7 @@ body, html {
 .day-header {
   display: flex;
   width: 100%;
-  padding: 1em 0 1em;
+  padding: 1em 0 1em;  
   & .date {
     margin: 0 0 0 2em;
     width: 35%;

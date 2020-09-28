@@ -15,7 +15,6 @@ defmodule GitNotesWeb.DayComponent do
     socket = assign(socket,
       changeset: Notes.change_file(%Notes.File{}))
       |> clear_search_topics()
-      |> IO.inspect
 
     {:ok, assign(socket, assigns)}
   end
@@ -136,37 +135,40 @@ defmodule GitNotesWeb.DayComponent do
   def handle_event("insert_topic", %{"location" => location, "content" => content}, socket) do
     %{user: user, file: file, date: date, search_topic_index: index, search_topics: topics, search_topic_entry_index: topic_entry_index} = socket.assigns
 
-    topic = Enum.at(topics, index)
+    cond do
+      length(topics) == 0 -> {:noreply, socket}
+      index == -1 -> {:noreply, socket}
+      true ->
+        topic = Enum.at(topics, index)
 
-    topic_entry_content =
-    # Notes.preload_topic_entries(topic)
-    topic
-    |> Map.get(:topic_entries)
-    |> Enum.reverse()
-    |> Enum.at(topic_entry_index)
-    |> Map.get(:content)
-    |> Base.decode64!()
+        topic_entry_content =
+        topic
+        |> Map.get(:topic_entries)
+        |> Enum.reverse()
+        |> Enum.at(topic_entry_index)
+        |> Map.get(:content)
+        |> Base.decode64!()
 
-    first = String.slice(content, 1..location)
-    middle = topic.heading <> topic_entry_content
-    last = String.slice(content, location, String.length(content))
+        first = String.slice(content, 1..location)
+        middle = topic.heading <> topic_entry_content
+        last = String.slice(content, location, String.length(content))
 
-    entries = Notes.generate_topic_entries_from_content((first <> middle <> last) |> Base.encode64, user.id)
+        entries = Notes.generate_topic_entries_from_content((first <> middle <> last) |> Base.encode64, user.id)
 
-    file = case file do
-      nil ->
-        Notes.change_file(%Notes.File{},
-        %{name: Date.to_string(date) <> ".md", git_repo_id: user.notes_repo_id, topic_entries: entries})
-      file -> Notes.change_update_file(file, %{topic_entries: entries})
+        file = case file do
+          nil ->
+            Notes.change_file(%Notes.File{},
+            %{name: Date.to_string(date) <> ".md", git_repo_id: user.notes_repo_id, topic_entries: entries})
+          file -> Notes.change_update_file(file, %{topic_entries: entries})
+        end
+        |> Ecto.Changeset.apply_changes()
+        |> Notes.preload_file_associations()
+
+        socket = socket
+        |> clear_search_topics()
+        |> assign(:file, file)
+        {:noreply, socket}
     end
-    |> Ecto.Changeset.apply_changes()
-    |> Notes.preload_file_associations()
-    |> IO.inspect
-
-    socket = socket
-    |> clear_search_topics()
-    |> assign(:file, file)
-    {:noreply, socket}
   end
 
 end
